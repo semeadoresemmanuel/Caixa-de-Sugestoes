@@ -8,6 +8,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false, // O registo agora é feito manualmente no index.html
+      includeManifestIcons: false, // <-- A MÁGICA ESTÁ AQUI: Impede a Vercel de quebrar com links externos
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
@@ -29,6 +30,7 @@ export default defineConfig({
         theme_color: '#002400',
         background_color: '#002400',
         display: 'standalone',
+        // Os seus ícones voltaram! E agora não causarão erros.
         icons: [
           {
             src: 'https://i.ibb.co/Kx7RP4QC/g2.png',
