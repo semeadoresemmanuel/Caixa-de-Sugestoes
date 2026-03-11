@@ -1,39 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Send, CheckCircle2, AlertCircle, MessageSquare, ChevronLeft, Trash2, Shield, Box, TreePine } from 'lucide-react';
+import { Lock, Send, CheckCircle2, AlertCircle, MessageSquare, ChevronLeft, ChevronRight, Trash2, Shield, Box, TreePine, ArrowLeft, ArrowRight, X, Plus } from 'lucide-react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 
-// URLs encriptadas em Base64 para evitar que o auto-formatador quebre os links
-const URLS = {
-  font1: atob('aHR0cHM6Ly9mb250cy5nb29nbGVhcGlzLmNvbS9jc3MyP2ZhbWlseT1SYWpkaGFuaTp3Z2h0QDQwMDs1MDAsNjAwOzcwMCZkaXNwbGF5PXN3YXA='),
-  font2: atob('aHR0cHM6Ly9mb250cy5jZG5mb250cy5jb20vY3NzL2xlbW9uLW1pbGs='),
-  logo: atob('aHR0cHM6Ly9pLmliYi5jby83dDBxNWJEZi9yZWN0MTc1LnBuZw=='),
-  icon: atob('aHR0cHM6Ly9pLmliYi5jby85SHhLV1pjUi9wYXRoMS0xLTIucG5n'),
-  btnSugerir: atob('aHR0cHM6Ly9pLmliYi5jby9CYjE3empnL3JlY3QxNjEucG5n'),
-  star: atob('aHR0cHM6Ly9pLmliYi5jby9zdnY4VERYbS9zdGFyLnBuZw=='),
-  adminIcon: atob('aHR0cHM6Ly9pLmliYi5jby90cHloRjk4Ri9wYXRoMS03LnBuZw==')
-};
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBkbpunOq4GGhR9RRHeHu4tl1eK_QYbMa0",
-  authDomain: "cdss-ac372.firebaseapp.com",
-  projectId: "cdss-ac372",
-  storageBucket: "cdss-ac372.firebasestorage.app",
-  messagingSenderId: "640125160487",
-  appId: "1:640125160487:web:b6098521f4eeb4ac845202"
-};
+// 1. Configuração do Firebase
+// Priorizamos a configuração do ambiente para o Preview, mas mantemos os seus dados como fallback
+const firebaseConfig = typeof __firebase_config !== 'undefined' 
+  ? JSON.parse(__firebase_config) 
+  : {
+      apiKey: "AIzaSyBkbpunOq4GGhR9RRHeHu4tl1eK_QYbMa0",
+      authDomain: "cdss-ac372.firebaseapp.com",
+      projectId: "cdss-ac372",
+      storageBucket: "cdss-ac372.firebasestorage.app",
+      messagingSenderId: "640125160487",
+      appId: "1:640125160487:web:b6098521f4eeb4ac845202"
+    };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const appId = 'caixa-sugestoes-app'; 
+
+// Uso seguro do appId para evitar erros de permissão no Canvas
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'caixa-sugestoes-app'; 
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [text, setText] = useState('');
   const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [imgError, setImgError] = useState(false);
   const [isStarHovered, setIsStarHovered] = useState(false);
   
   const [isAdminView, setIsAdminView] = useState(false);
@@ -41,59 +37,99 @@ export default function App() {
   const [passcode, setPasscode] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [passcodeError, setPasscodeError] = useState(false);
+  const [isPasscodeFocused, setIsPasscodeFocused] = useState(false);
 
   const ADMIN_PASSCODE = 'CSSemeadores';
 
-  // Autenticação
+  // 2. Autenticação (Regra Obrigatória 3)
   useEffect(() => {
-    signInAnonymously(auth).catch(err => console.error("Erro Auth:", err));
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (error) {
+        console.error("Erro na autenticação:", error);
+        setErrorMessage("Erro ao conectar com o banco de dados.");
+      }
+    };
+    initAuth();
+
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
     return () => unsubscribe();
   }, []);
 
-  // CARREGAMENTO SEGURO DAS FONTES
+  // Injeção de Fontes
   useEffect(() => {
-    const font1 = document.createElement('link');
-    font1.href = URLS.font1;
-    font1.rel = "stylesheet";
-    document.head.appendChild(font1);
-
-    const font2 = document.createElement('link');
-    font2.href = URLS.font2;
-    font2.rel = "stylesheet";
-    document.head.appendChild(font2);
-
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Rajdhani:wght@400;500;600;700&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
     return () => {
-      document.head.removeChild(font1);
-      document.head.removeChild(font2);
+      try {
+        if (document.head.contains(link)) document.head.removeChild(link);
+      } catch (e) {}
     };
   }, []);
 
-  // Buscar Sugestões
+  // 3. Buscar Sugestões (Regras 1 e 2)
   useEffect(() => {
     if (!user || !isAuthenticatedAdmin) return;
+    
+    // Caminho rigoroso conforme Regra 1 e as suas Regras de Segurança
     const suggestionsRef = collection(db, 'artifacts', appId, 'public', 'data', 'suggestions');
+    
     const unsubscribe = onSnapshot(suggestionsRef, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      data.sort((a, b) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
+      // Ordenação segura contra dados corrompidos
+      data.sort((a, b) => {
+        const timeA = (a.timestamp && typeof a.timestamp.toMillis === 'function') ? a.timestamp.toMillis() : 0;
+        const timeB = (b.timestamp && typeof b.timestamp.toMillis === 'function') ? b.timestamp.toMillis() : 0;
+        return timeB - timeA;
+      });
       setSuggestions(data);
+    }, (error) => {
+      console.error("Erro no Firestore (Snapshot):", error);
+      // Se aparecer este erro, verifique se a coleção "artifacts" existe e se as regras permitem acesso
     });
     return () => unsubscribe();
   }, [user, isAuthenticatedAdmin]);
 
+  // 4. Enviar Sugestão
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user || !text.trim()) return;
+
     setStatus('submitting');
+    setErrorMessage('');
+    
     try {
+      // Caminho: artifacts -> caixa-sugestoes-app -> public -> data -> suggestions
       const suggestionsRef = collection(db, 'artifacts', appId, 'public', 'data', 'suggestions');
-      await addDoc(suggestionsRef, { text: text.trim(), timestamp: serverTimestamp() });
+      await addDoc(suggestionsRef, {
+        text: text.trim(),
+        timestamp: serverTimestamp(),
+      });
       setStatus('success');
       setText('');
-      setTimeout(() => setStatus('idle'), 4000);
+      // Removido o setTimeout para que a tela fique "travada" no Sucesso até o usuário fechar
     } catch (error) {
+      console.error("Erro ao gravar:", error);
       setStatus('error');
-      setErrorMessage('Erro ao enviar.');
+      setErrorMessage(`Falha no envio: ${error.message}. Verifique se o Login Anónimo está ativo no seu console.`);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!user || !isAuthenticatedAdmin) return;
+    try {
+      await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'suggestions', id));
+    } catch (error) {
+      console.error("Erro ao excluir:", error);
     }
   };
 
@@ -105,70 +141,93 @@ export default function App() {
       setPasscode('');
     } else {
       setPasscodeError(true);
+      setPasscode(''); // Limpa a senha digitada ao errar
     }
   };
 
   const formatDate = (timestamp) => {
-    if (!timestamp) return 'Agora';
+    // Verificação de segurança: impede o crash se o timestamp estiver corrompido no banco de dados
+    if (!timestamp || typeof timestamp.toDate !== 'function') return 'Agora mesmo';
     const date = timestamp.toDate();
-    return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date);
+    return new Intl.DateTimeFormat('pt-PT', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    }).format(date);
   };
 
   if (isAdminView) {
     if (!isAuthenticatedAdmin) {
       return (
-        <div className="min-h-screen bg-[#002400] flex flex-col items-center justify-center p-4 text-[#00cc00]" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
-          <div className="bg-[#002400] p-8 rounded-2xl border border-[#00cc00]/20 w-full max-w-md shadow-2xl">
-            <div className="flex justify-center mb-6">
-              <Lock size={32} className="text-[#00cc00]" />
+        <div className="min-h-screen bg-[#002400] flex flex-col items-center justify-center p-4" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
+          <div className="bg-[#002400] p-8 rounded-2xl border border-[#00cc00]/20 shadow-sm w-full max-w-md">
+            <div className="flex items-center justify-center w-16 h-16 bg-transparent border border-[#00cc00]/40 rounded-full mb-6 mx-auto text-[#00cc00]">
+              <img src={"https://" + "i.ibb.co/kVPbr1t3/path1-12.png"} alt="Cadeado" className="w-7 h-7 object-contain" />
             </div>
-            <h2 className="text-2xl font-bold text-center mb-6 uppercase tracking-wider" style={{ fontFamily: "'LEMON MILK', sans-serif" }}>Área Restrita</h2>
+            <h2 className="text-3xl font-bold text-center text-[#00cc00] mb-2 tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Área Restrita</h2>
+            <p className="text-center text-[#00cc00]/80 mb-8 text-sm">Digite a senha de Administrador</p>
             <form onSubmit={handleAdminLogin} className="space-y-4">
-              <input type="password" value={passcode} onChange={(e) => setPasscode(e.target.value)} placeholder="Senha de Acesso" className="w-full px-4 py-3 rounded-xl border border-[#00cc00]/50 bg-[#002400] text-[#00cc00] outline-none focus:ring-2 focus:ring-[#00cc00]" />
-              <button type="submit" className="w-full bg-[#00cc00] text-[#002400] font-bold py-3 rounded-xl hover:bg-[#00cc00]/80 transition">Aceder</button>
+              <input
+                type="text"
+                value={passcode}
+                onChange={(e) => { setPasscode(e.target.value); setPasscodeError(false); }}
+                onFocus={() => setIsPasscodeFocused(true)}
+                onBlur={() => setIsPasscodeFocused(false)}
+                placeholder={passcodeError ? "DIGITE NOVAMENTE" : (isPasscodeFocused ? "" : "SENHA")}
+                className={`w-full px-4 py-3 rounded-xl border focus:ring-2 bg-[#002400] outline-none transition text-center tracking-widest text-lg ${passcodeError ? 'border-red-500 placeholder:text-red-500 focus:ring-red-500 text-red-500' : 'border-[#00cc00]/50 placeholder:text-[#00cc00]/50 focus:ring-[#00cc00] text-[#00cc00]'}`}
+              />
+              <div className="flex justify-center items-center space-x-6 pt-4">
+                <button 
+                  type="button" 
+                  onClick={() => { setIsAdminView(false); setIsStarHovered(false); setPasscode(''); setPasscodeError(false); }} 
+                  className={`flex items-center justify-center w-14 h-14 rounded-full border transition-all duration-300 active:scale-95 ${passcode.length === 0 ? 'border-[#00cc00] text-[#00cc00] shadow-[0_0_15px_rgba(0,204,0,0.5)]' : 'border-[#00cc00]/40 text-[#00cc00]/60 hover:text-[#00cc00] hover:border-[#00cc00] hover:shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
+                  title="Voltar"
+                >
+                  <ChevronLeft size={28} strokeWidth={2.5} />
+                </button>
+                <button 
+                  type="submit" 
+                  className={`flex items-center justify-center w-14 h-14 rounded-full border transition-all duration-300 active:scale-95 ${passcode.length > 0 ? 'border-[#00cc00] text-[#00cc00] shadow-[0_0_15px_rgba(0,204,0,0.5)] hover:scale-105' : 'border-[#00cc00]/40 text-[#00cc00]/60 hover:text-[#00cc00] hover:border-[#00cc00] hover:shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
+                  title="Entrar"
+                >
+                  <ChevronRight size={28} strokeWidth={2.5} />
+                </button>
+              </div>
             </form>
-            <button onClick={() => setIsAdminView(false)} className="mt-6 flex items-center justify-center w-full text-center text-sm opacity-70 hover:opacity-100 transition">
-               <ChevronLeft size={16} className="mr-1" /> Voltar
-            </button>
           </div>
         </div>
       );
     }
     return (
-      <div className="min-h-screen bg-[#002400] p-4 text-[#00cc00]" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
-        <div className="max-w-3xl mx-auto mt-8">
-          <div className="flex justify-between items-center mb-8 bg-[#002400] border border-[#00cc00]/20 p-4 rounded-2xl shadow-lg">
+      <div className="min-h-screen bg-[#002400] p-4 md:p-8" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center justify-between mb-8 bg-[#002400] border border-[#00cc00]/20 p-4 rounded-2xl shadow-sm">
             <div className="flex items-center space-x-3">
-              <div className="bg-[#002400] border border-[#00cc00]/20 p-2 rounded-lg">
-                <img src={URLS.adminIcon} alt="Icon" className="w-6 h-6 object-contain" />
+              <div className="bg-[#002400] border border-[#00cc00]/20 p-2 rounded-lg text-[#00cc00]">
+                <img src="https://i.ibb.co/tpyhF98F/path1-7.png" alt="Icon" className="w-6 h-6 object-contain" />
               </div>
-              <h1 className="text-xl font-bold uppercase tracking-wider" style={{ fontFamily: "'LEMON MILK', sans-serif" }}>Sugestões Recebidas</h1>
+              <h1 className="text-xl font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sugestões</h1>
             </div>
-            <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); }} className="flex items-center text-sm border border-[#00cc00]/30 px-4 py-2 rounded-lg hover:bg-[#00cc00]/10 transition">
-              Sair <Lock size={14} className="ml-2" />
+            <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); setIsStarHovered(false); }} className="bg-[#002400] border border-[#00cc00]/20 p-2 rounded-lg hover:bg-[#00cc00]/10 transition" title="Sair">
+              <img src={"https://" + "i.ibb.co/fVC1hZ6t/path1-1.png"} alt="Sair" className="w-6 h-6 object-contain" />
             </button>
           </div>
           <div className="space-y-4">
             {suggestions.length === 0 ? (
-              <div className="bg-[#002400] border border-[#00cc00]/20 rounded-2xl p-12 text-center opacity-60">
-                <MessageSquare size={40} className="mx-auto mb-4 opacity-50" />
-                <p>Nenhuma sugestão catalogada ainda.</p>
+              <div className="bg-[#002400] p-12 rounded-2xl shadow-sm text-center border border-[#00cc00]/20">
+                <X size={48} className="mx-auto text-[#00cc00] mb-4" />
+                <p className="text-[#00cc00]">Não há sugestões no momento.</p>
               </div>
             ) : (
               suggestions.map((sug) => (
-                <div key={sug.id} className="bg-[#001a00] p-6 rounded-2xl border border-[#00cc00]/30 group transition-all hover:border-[#00cc00]/60 shadow-lg">
+                <div key={sug.id} className="bg-[#002400] p-6 rounded-2xl shadow-sm border border-[#00cc00]/30 group relative">
                   <div className="flex justify-between items-start mb-4">
-                    <span className="text-xs font-semibold bg-[#002400] border border-[#00cc00]/30 px-3 py-1 rounded-full flex items-center">
-                      <Shield size={12} className="mr-2" /> ANÓNIMO
-                    </span>
-                    <div className="flex items-center space-x-4">
-                      <span className="text-xs opacity-60 font-medium">{formatDate(sug.timestamp)}</span>
-                      <button onClick={() => handleDelete(sug.id)} className="opacity-0 group-hover:opacity-100 text-[#00cc00]/40 hover:text-red-500 transition-all">
-                        <Trash2 size={16} />
-                      </button>
+                    <img src={"https://" + "i.ibb.co/XfY9PF0W/path1-52.png"} alt="Anónimo" className="h-7 w-auto object-contain" />
+                    <div className="flex items-center space-x-3">
+                      <span className="text-xs text-[#00cc00]/60 font-medium">{formatDate(sug.timestamp)}</span>
+                      <button onClick={() => handleDelete(sug.id)} className="text-[#00cc00]/40 hover:text-red-500 transition opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
                     </div>
                   </div>
-                  <p className="whitespace-pre-wrap text-lg leading-relaxed">{sug.text}</p>
+                  <p className="text-[#00cc00] whitespace-pre-wrap leading-relaxed">{sug.text}</p>
                 </div>
               ))
             )}
@@ -179,47 +238,62 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#002400] flex flex-col items-center justify-center p-4 text-[#00cc00]" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
-      <div className="w-full max-w-md bg-[#002400] rounded-3xl border border-[#00cc00]/30 shadow-[0_8px_30px_rgb(0,204,0,0.15)] overflow-hidden">
-        
-        <div className="p-8 pb-4">
-          <div className="flex justify-between items-center mb-8">
-            <img src={URLS.logo} alt="Logo" className="h-10 w-auto object-contain drop-shadow-md" />
-            <img src={URLS.icon} alt="Icon" className="h-10 w-auto object-contain drop-shadow-md" />
+    <div className="min-h-screen bg-[#002400] flex flex-col items-center justify-center p-4" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
+      <div className="w-full max-w-md overflow-hidden bg-[#002400] rounded-3xl border border-[#00cc00]/30 shadow-[0_8px_30px_rgb(0,204,0,0.1)]">
+        {status !== 'success' && (
+          <div className="bg-[#002400] p-8 pb-4 text-[#00cc00]">
+            <div className="flex justify-between items-start mb-6">
+              {!imgError ? (
+                <img src="https://i.ibb.co/7t0q5bDf/rect175.png" alt="Logo" className="h-10 w-auto object-contain" onError={() => setImgError(true)} />
+              ) : (
+                <div className="flex items-center justify-center bg-[#011a00] text-[#00cc00] px-4 py-2 rounded-3xl border border-[#00cc00]"><TreePine size={16} /></div>
+              )}
+              <img src="https://i.ibb.co/9HxKWZcR/path1-1-2.png" alt="Icon" className="h-10 w-auto object-contain" />
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-[#00cc00] text-center uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Caixa de Sugestões</h1>
           </div>
-          <h1 className="text-3xl font-bold uppercase text-center mb-2 tracking-wide" style={{ fontFamily: "'LEMON MILK', sans-serif" }}>Caixa de Sugestões</h1>
-          <p className="text-center text-sm opacity-80 leading-relaxed">
-            Sua opinião é anónima e valiosa.<br/>
-            Envie ideias, críticas ou elogios.
-          </p>
-        </div>
-
-        <div className="p-8 pt-2">
+        )}
+        <div className={status === 'success' ? "p-10" : "p-8 pt-2"}>
           {status === 'success' ? (
-            <div className="py-10 flex flex-col items-center text-center animate-pulse">
-              <div className="w-16 h-16 rounded-full border border-[#00cc00] flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(0,204,0,0.5)]">
-                 <CheckCircle2 size={32} />
-              </div>
-              <h2 className="text-xl font-bold mb-2 uppercase tracking-wide">Mensagem Catalogada!</h2>
-              <p className="text-sm opacity-80">Agradecemos imenso a sua colaboração.</p>
+            <div className="flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-300 min-h-[360px]">
+              <button
+                onClick={() => setStatus('idle')}
+                className="flex items-center justify-center w-16 h-16 mb-8 border border-[#00cc00]/40 rounded-full text-[#00cc00] hover:bg-[#00cc00]/10 hover:border-[#00cc00] hover:shadow-[0_0_15px_rgba(0,204,0,0.3)] transition-all active:scale-95"
+                title="Nova Sugestão"
+              >
+                <Plus size={36} strokeWidth={1.5} />
+              </button>
+              <h2 className="text-3xl font-bold text-[#00cc00] mb-8 tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sucesso!</h2>
+              <img src={"https://" + "i.ibb.co/Kx7RP4QC/g2.png"} alt="Sucesso" className="w-24 h-24 mb-8 object-contain" />
+              <p className="text-[#00cc00]/80 text-sm px-4 leading-relaxed">Sua mensagem foi catalogada anonimamente.<br/>Agradecemos sua colaboração!</p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <textarea 
-                value={text} 
-                onChange={(e) => setText(e.target.value)} 
-                placeholder="Eu sugiro..." 
-                className="w-full h-44 p-5 bg-[#001a00] border-2 border-[#00cc00]/30 rounded-2xl focus:border-[#00cc00] outline-none transition-all resize-none text-[#00cc00] text-lg shadow-inner placeholder:text-[#00cc00]/40" 
-                required 
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <p className="text-[#00cc00]/80 text-sm mb-2 text-center leading-relaxed">
+                Suas sugestões são 100% anônimas!<br/>
+                Envie ideias, elogios ou críticas.
+              </p>
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Eu sugiro..."
+                className="w-full h-40 p-4 bg-[#002400] border-2 border-[#00cc00]/30 opacity-60 hover:opacity-80 focus:opacity-100 rounded-2xl focus:outline-none focus:ring-0 focus:border-[#00cc00] resize-none transition-all duration-300 text-[#00cc00] placeholder:text-[#00cc00]/50"
                 disabled={status === 'submitting'}
+                required
               />
-              <div className="flex justify-center">
-                <button 
-                  type="submit" 
-                  disabled={status === 'submitting' || !text.trim()} 
-                  className={`transition-all duration-300 ${status === 'submitting' || !text.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95 drop-shadow-[0_0_8px_rgba(0,204,0,0.5)] hover:drop-shadow-[0_0_20px_rgba(0,204,0,0.8)]'}`}
-                >
-                  <img src={URLS.btnSugerir} alt="Sugerir" className="max-h-16 w-auto object-contain" />
+              {errorMessage && (
+                <div className="flex items-center text-red-500 bg-red-900/20 p-3 rounded-xl text-xs border border-red-500/50">
+                  <AlertCircle size={14} className="mr-2 flex-shrink-0" />
+                  <p>{errorMessage}</p>
+                </div>
+              )}
+              <div className="flex justify-center w-full">
+                <button type="submit" disabled={status === 'submitting' || !text.trim()} className={`flex items-center justify-center transition-all duration-300 ${ (status === 'submitting' || !text.trim()) ? 'cursor-not-allowed opacity-40' : 'opacity-100 hover:scale-[1.05] active:scale-[0.95] hover:drop-shadow-[0_0_15px_rgba(0,204,0,0.8)]' }`}>
+                  {status === 'submitting' ? (
+                    <div className="px-12 h-14 bg-[#002400] border border-[#00cc00]/20 rounded-2xl flex items-center justify-center"><div className="w-6 h-6 border-2 border-[#00cc00]/40 border-t-[#00cc00] rounded-full animate-spin"></div></div>
+                  ) : (
+                    <img src={"https://" + "i.ibb.co/YBjWxZxW/rect161.png"} alt="Sugerir" className="h-auto max-h-16 object-contain" />
+                  )}
                 </button>
               </div>
             </form>
@@ -227,25 +301,15 @@ export default function App() {
         </div>
       </div>
       
-      <div className="mt-8">
-        <button 
-          onClick={() => setIsAdminView(true)} 
-          onMouseEnter={() => setIsStarHovered(true)} 
-          onMouseLeave={() => setIsStarHovered(false)} 
-          className="group outline-none transition-all active:scale-90 p-4"
-        >
-          <div className="w-8 h-8 flex items-center justify-center">
-            <img 
-              src={URLS.star} 
-              alt="Admin" 
-              className={`w-6 h-6 object-contain transition-all duration-300 ${isStarHovered ? 'scale-125 opacity-100' : 'opacity-40 scale-100'}`} 
-              style={{ 
-                filter: `invert(53%) sepia(91%) saturate(3015%) hue-rotate(88deg) brightness(112%) contrast(127%) ${isStarHovered ? 'drop-shadow(0 0 12px #00cc00)' : ''}` 
-              }} 
-            />
-          </div>
-        </button>
-      </div>
+      {status !== 'success' && (
+        <div className="mt-8 text-center flex flex-col items-center">
+          <button onClick={() => { setIsAdminView(true); setIsStarHovered(false); }} onMouseEnter={() => setIsStarHovered(true)} onMouseLeave={() => setIsStarHovered(false)} className="p-3 transition-all group outline-none active:scale-90">
+            <div className="w-8 h-8 flex items-center justify-center transition-all">
+              <img src="https://i.ibb.co/svv8TDXm/star.png" alt="Admin" className={`w-5 h-5 object-contain transition-all duration-300 ${isStarHovered ? 'scale-125 opacity-100' : 'opacity-70 scale-100'}`} style={{ filter: `invert(53%) sepia(91%) saturate(3015%) hue-rotate(88deg) brightness(112%) contrast(127%) ${isStarHovered ? 'drop-shadow(0 0 12px #00cc00)' : ''}` }} />
+            </div>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
