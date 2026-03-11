@@ -19,6 +19,75 @@
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.3",
-    "vite": "^4.4.5"
+    "vite": "^4.4.5",
+    "vite-plugin-pwa": "^0.17.0"
   }
 }
+
+### 3. Criar o ficheiro `vite.config.js` no GitHub
+
+Como usamos imagens que vêm de links externos (do `i.ibb.co`), se ficarmos offline, elas ficariam com "erro de imagem quebrada". 
+
+Para evitar isso, crie um ficheiro novo na **raiz** do seu repositório no GitHub (junto ao `index.html`) e dê o nome de **`vite.config.js`**. Cole isto lá dentro:
+
+```javascript
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
+
+export default defineConfig({
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      manifest: {
+        name: 'Caixa de Sugestões Semeadores',
+        short_name: 'Sugestões',
+        description: 'Caixa de Sugestões Anónima',
+        theme_color: '#002400',
+        background_color: '#002400',
+        display: 'standalone'
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        runtimeCaching: [
+          {
+            // Guarda as nossas imagens do i.ibb.co para quando a internet cair
+            urlPattern: /^https:\/\/i\.ibb\.co\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'external-images',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 365
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            // Guarda as nossas fontes de letra do Google
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          }
+        ]
+      }
+    })
+  ]
+})
+
+### O que vai acontecer agora?
+Assim que enviar estes 3 ficheiros atualizados para o GitHub, a Vercel vai reconstruir o site de novo. 
+
+Quando o visitar, o "Service Worker" vai guardar uma cópia exata do site na memória do seu navegador. Da próxima vez que desligar a internet e tentar abrir o link do site, a **tela do dinossauro não vai mais aparecer**. O site carregará o visual perfeito (graças ao cache das imagens) e o Firebase garantirá que, ao clicar em "SUGERIR", a mensagem fica guardada à espera da rede!
