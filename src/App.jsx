@@ -4,7 +4,6 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 
-// 1. Configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBkbpunOq4GGhR9RRHeHu4tl1eK_QYbMa0",
   authDomain: "cdss-ac372.firebaseapp.com",
@@ -25,7 +24,6 @@ export default function App() {
   const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [isStarHovered, setIsStarHovered] = useState(false);
-  
   const [isAdminView, setIsAdminView] = useState(false);
   const [isAuthenticatedAdmin, setIsAuthenticatedAdmin] = useState(false);
   const [passcode, setPasscode] = useState('');
@@ -150,7 +148,7 @@ export default function App() {
           {status === 'success' ? (
             <div className="py-10 text-center animate-pulse">
               <CheckCircle2 size={48} className="mx-auto mb-4" />
-              <h2 className="text-xl font-bold mb-2">MENSAGEM CATALOGADA!</h2>
+              <h2 className="text-xl font-bold mb-2 uppercase">Mensagem Catalogada!</h2>
               <p className="text-sm opacity-80">Sua mensagem foi catalogada anonimamente. Agradecemos sua colaboração!</p>
             </div>
           ) : (
