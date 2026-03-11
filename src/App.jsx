@@ -9,7 +9,7 @@ import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, deleteDo
 const firebaseConfig = typeof __firebase_config !== 'undefined' 
   ? JSON.parse(__firebase_config) 
   : {
-      apiKey: "AIzaSyBkbpunOq4GGhR9RRHeHu4tl1eK_QYbMa0",
+      apiKey: "AIzaSyBkbpUNQq4GGhR9RRHeHu4tl1eK_QYbMa8",
       authDomain: "cdss-ac372.firebaseapp.com",
       projectId: "cdss-ac372",
       storageBucket: "cdss-ac372.firebasestorage.app",
@@ -52,7 +52,8 @@ export default function App() {
         }
       } catch (error) {
         console.error("Erro na autenticação:", error);
-        setErrorMessage("Erro ao conectar com o banco de dados.");
+        // Agora mostrará o erro exato do Firebase na tela
+        setErrorMessage("Erro Auth: " + error.message);
       }
     };
     initAuth();
