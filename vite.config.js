@@ -7,46 +7,40 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      manifest: {
-        name: 'Caixa de Sugestões Semeadores',
-        short_name: 'Sugestões',
-        description: 'Caixa de Sugestões Anónima',
-        theme_color: '#002400',
-        background_color: '#002400',
-        display: 'standalone'
-      },
+      injectRegister: false, // O registo agora é feito manualmente no index.html
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
           {
-            // Guarda as nossas imagens do i.ibb.co para quando a internet cair
-            urlPattern: /^https:\/\/i\.ibb\.co\/.*/i,
+            urlPattern: /^https:\/\/(i\.ibb\.co|fonts\.googleapis\.com|fonts\.gstatic\.com)\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'external-images',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 365
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
+              cacheName: 'external-assets',
+              expiration: { maxEntries: 100, maxAgeSeconds: 31536000 },
+              cacheableResponse: { statuses: [0, 200] }
             }
+          }
+        ]
+      },
+      manifest: {
+        name: 'Caixa de Sugestões',
+        short_name: 'Sugestões',
+        description: 'Caixa de Sugestões Anónima',
+        theme_color: '#002400',
+        background_color: '#002400',
+        display: 'standalone',
+        icons: [
+          {
+            src: 'https://i.ibb.co/Kx7RP4QC/g2.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable'
           },
           {
-            // Guarda as nossas fontes de letra do Google
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
+            src: 'https://i.ibb.co/Kx7RP4QC/g2.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
           }
         ]
       }
