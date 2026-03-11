@@ -4,6 +4,17 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 
+// URLs encriptadas em Base64 para evitar que o auto-formatador quebre os links
+const URLS = {
+  font1: atob('aHR0cHM6Ly9mb250cy5nb29nbGVhcGlzLmNvbS9jc3MyP2ZhbWlseT1SYWpkaGFuaTp3Z2h0QDQwMDs1MDAsNjAwOzcwMCZkaXNwbGF5PXN3YXA='),
+  font2: atob('aHR0cHM6Ly9mb250cy5jZG5mb250cy5jb20vY3NzL2xlbW9uLW1pbGs='),
+  logo: atob('aHR0cHM6Ly9pLmliYi5jby83dDBxNWJEZi9yZWN0MTc1LnBuZw=='),
+  icon: atob('aHR0cHM6Ly9pLmliYi5jby85SHhLV1pjUi9wYXRoMS0xLTIucG5n'),
+  btnSugerir: atob('aHR0cHM6Ly9pLmliYi5jby9CYjE3empnL3JlY3QxNjEucG5n'),
+  star: atob('aHR0cHM6Ly9pLmliYi5jby9zdnY4VERYbS9zdGFyLnBuZw=='),
+  adminIcon: atob('aHR0cHM6Ly9pLmliYi5jby90cHloRjk4Ri9wYXRoMS03LnBuZw==')
+};
+
 const firebaseConfig = {
   apiKey: "AIzaSyBkbpunOq4GGhR9RRHeHu4tl1eK_QYbMa0",
   authDomain: "cdss-ac372.firebaseapp.com",
@@ -43,12 +54,12 @@ export default function App() {
   // CARREGAMENTO SEGURO DAS FONTES
   useEffect(() => {
     const font1 = document.createElement('link');
-    font1.href = "https://" + "[fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap](https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap)";
+    font1.href = URLS.font1;
     font1.rel = "stylesheet";
     document.head.appendChild(font1);
 
     const font2 = document.createElement('link');
-    font2.href = "https://" + "[fonts.cdnfonts.com/css/lemon-milk](https://fonts.cdnfonts.com/css/lemon-milk)";
+    font2.href = URLS.font2;
     font2.rel = "stylesheet";
     document.head.appendChild(font2);
 
@@ -129,7 +140,7 @@ export default function App() {
           <div className="flex justify-between items-center mb-8 bg-[#002400] border border-[#00cc00]/20 p-4 rounded-2xl shadow-lg">
             <div className="flex items-center space-x-3">
               <div className="bg-[#002400] border border-[#00cc00]/20 p-2 rounded-lg">
-                <img src={"https://" + "i.ibb.co/tpyhF98F/path1-7.png"} alt="Icon" className="w-6 h-6 object-contain" />
+                <img src={URLS.adminIcon} alt="Icon" className="w-6 h-6 object-contain" />
               </div>
               <h1 className="text-xl font-bold uppercase tracking-wider" style={{ fontFamily: "'LEMON MILK', sans-serif" }}>Sugestões Recebidas</h1>
             </div>
@@ -173,8 +184,8 @@ export default function App() {
         
         <div className="p-8 pb-4">
           <div className="flex justify-between items-center mb-8">
-            <img src={"https://" + "i.ibb.co/7t0q5bDf/rect175.png"} alt="Logo" className="h-10 w-auto object-contain drop-shadow-md" />
-            <img src={"https://" + "i.ibb.co/9HxKWZcR/path1-1-2.png"} alt="Icon" className="h-10 w-auto object-contain drop-shadow-md" />
+            <img src={URLS.logo} alt="Logo" className="h-10 w-auto object-contain drop-shadow-md" />
+            <img src={URLS.icon} alt="Icon" className="h-10 w-auto object-contain drop-shadow-md" />
           </div>
           <h1 className="text-3xl font-bold uppercase text-center mb-2 tracking-wide" style={{ fontFamily: "'LEMON MILK', sans-serif" }}>Caixa de Sugestões</h1>
           <p className="text-center text-sm opacity-80 leading-relaxed">
@@ -208,7 +219,7 @@ export default function App() {
                   disabled={status === 'submitting' || !text.trim()} 
                   className={`transition-all duration-300 ${status === 'submitting' || !text.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95 drop-shadow-[0_0_8px_rgba(0,204,0,0.5)] hover:drop-shadow-[0_0_20px_rgba(0,204,0,0.8)]'}`}
                 >
-                  <img src={"https://" + "i.ibb.co/Bb17zjg/rect161.png"} alt="Sugerir" className="max-h-16 w-auto object-contain" />
+                  <img src={URLS.btnSugerir} alt="Sugerir" className="max-h-16 w-auto object-contain" />
                 </button>
               </div>
             </form>
@@ -225,7 +236,7 @@ export default function App() {
         >
           <div className="w-8 h-8 flex items-center justify-center">
             <img 
-              src={"https://" + "i.ibb.co/svv8TDXm/star.png"} 
+              src={URLS.star} 
               alt="Admin" 
               className={`w-6 h-6 object-contain transition-all duration-300 ${isStarHovered ? 'scale-125 opacity-100' : 'opacity-40 scale-100'}`} 
               style={{ 
