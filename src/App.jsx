@@ -9,7 +9,7 @@ import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, deleteDo
 const firebaseConfig = typeof __firebase_config !== 'undefined' 
   ? JSON.parse(__firebase_config) 
   : {
-      apiKey: "AIzaSyBkbpUNQq4GGhR9RRHeHu4tl1eK_QYbMa8",
+      apiKey: "AIzaSyBkbpUNOq4GGhR9RRhEHu4tl1eK_QYbMa0", 
       authDomain: "cdss-ac372.firebaseapp.com",
       projectId: "cdss-ac372",
       storageBucket: "cdss-ac372.firebasestorage.app",
