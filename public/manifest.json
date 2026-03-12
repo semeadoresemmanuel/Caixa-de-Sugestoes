@@ -7,51 +7,16 @@
   "display": "standalone",
   "icons": [
     {
-      "src": "https://i.ibb.co/Kx7RP4QC/g2.png",
+      "src": "https://i.ibb.co/FkHp250R/favicon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://i.ibb.co/Kx7RP4QC/g2.png",
+      "src": "https://i.ibb.co/FkHp250R/favicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ]
 }
-
-### Passo 2: Atualizar o `index.html`
-Vá ao ficheiro `index.html` (na raiz do repositório) e adicione o link para este novo manifest. Substitua tudo pelo código abaixo:
-
-```html
-<!DOCTYPE html>
-<html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#002400" />
-    <link rel="apple-touch-icon" href="https://i.ibb.co/9HxKWZcR/path1-1-2.png" />
-    
-    <!-- Link para o novo manifest que acabámos de criar -->
-    <link rel="manifest" href="/manifest.json" />
-    
-    <title>Caixa de Sugestões</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-    
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js', { scope: '/' })
-            .then(() => console.log('Modo offline ativado com sucesso!'))
-            .catch(err => console.log('Erro no offline: ', err));
-        });
-      }
-    </script>
-  </body>
-</html>
-
-Com estas alterações no GitHub, a Vercel vai compilar o site **com sucesso** (sem bloqueios do Vite) e o modo offline continuará a reter os seus ícones intactos!
