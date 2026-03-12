@@ -96,12 +96,22 @@ export default function App() {
     
     try {
       const suggestionsRef = collection(db, 'artifacts', appId, 'public', 'data', 'suggestions');
-      await addDoc(suggestionsRef, {
+      
+      // Chama o banco. Com a persistência offline, ele salva localmente na mesma hora.
+      const addPromise = addDoc(suggestionsRef, {
         text: text.trim(),
         timestamp: serverTimestamp(),
       });
-      setStatus('success');
-      setText('');
+      
+      // Registra possíveis erros em background caso o servidor recuse mais tarde
+      addPromise.catch(error => console.error("Sincronização pendente:", error));
+      
+      // UX Optimista: simula 600ms de "loading" e aprova na UI, não travando o app se estiver offline
+      setTimeout(() => {
+        setStatus('success');
+        setText('');
+      }, 600);
+
     } catch (error) {
       setStatus('error');
       setErrorMessage(`Falha no envio: ${error.message}`);
