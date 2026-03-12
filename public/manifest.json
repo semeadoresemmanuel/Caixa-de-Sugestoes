@@ -4,6 +4,11 @@
   "description": "Caixa de Sugestões Anónima",
   "theme_color": "#002400",
   "background_color": "#002400",
+  "start_url": "/",
+  "id": "/",
+  "dir": "ltr",
+  "lang": "pt-BR",
+  "orientation": "portrait",
   "display": "standalone",
   "icons": [
     {
