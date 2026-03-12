@@ -4,6 +4,16 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, deleteDoc, doc, enableIndexedDbPersistence } from 'firebase/firestore';
 
+import cadeadoImg from './assets/cadeado.png';
+import boxImg from './assets/box.png';
+import sairImg from './assets/sair.png';
+import anonimoImg from './assets/anonimo.png';
+import iconLeftImg from './assets/icon_left.png';
+import iconRightImg from './assets/icon_right.png';
+import checkImg from './assets/check.png';
+import sugerirImg from './assets/sugerir.png';
+import estrelaImg from './assets/estrela.png';
+
 // 1. Configuração do Firebase
 const firebaseConfig = typeof __firebase_config !== 'undefined' 
   ? JSON.parse(__firebase_config) 
@@ -160,7 +170,7 @@ export default function App() {
         <div className="min-h-screen bg-[#002400] flex flex-col items-center justify-center p-4" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
           <div className="bg-[#002400] p-8 rounded-2xl border border-[#00cc00]/20 shadow-sm w-full max-w-md">
             <div className="flex items-center justify-center w-16 h-16 bg-transparent border border-[#00cc00]/40 rounded-full mb-6 mx-auto text-[#00cc00]">
-              <img src={"https://" + "i.ibb.co/kVPbr1t3/path1-12.png"} alt="Cadeado" className="w-7 h-7 object-contain" />
+              <img src={cadeadoImg} alt="Cadeado" className="w-7 h-7 object-contain" />
             </div>
             <h2 className="text-3xl font-bold text-center text-[#00cc00] mb-2 tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Área Restrita</h2>
             <p className="text-center text-[#00cc00]/80 mb-8 text-sm">Digite a senha de Administrador</p>
@@ -202,7 +212,7 @@ export default function App() {
           <div className="flex items-center justify-between mb-8 bg-[#002400] border border-[#00cc00]/20 p-4 rounded-2xl shadow-sm">
             <div className="flex items-center space-x-3">
               <div className="bg-[#002400] border border-[#00cc00]/20 p-2 rounded-lg text-[#00cc00]">
-                <img src="https://i.ibb.co/tpyhF98F/path1-7.png" alt="Icon" className="w-6 h-6 object-contain" />
+                <img src={boxImg} alt="Icon" className="w-6 h-6 object-contain" />
               </div>
               <h1 className="text-xl font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sugestões</h1>
             </div>
@@ -213,7 +223,7 @@ export default function App() {
                 </button>
               )}
               <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); setIsStarHovered(false); }} className="bg-[#002400] border border-[#00cc00]/20 p-2 rounded-lg hover:bg-[#00cc00]/10 transition flex items-center justify-center cursor-pointer" title="Sair">
-                <img src={"https://" + "i.ibb.co/fVC1hZ6t/path1-1.png"} alt="Sair" className="w-6 h-6 object-contain" />
+                <img src={sairImg} alt="Sair" className="w-6 h-6 object-contain" />
               </button>
             </div>
           </div>
@@ -226,7 +236,7 @@ export default function App() {
               suggestions.map((sug) => (
                 <div key={sug.id} className="bg-[#002400] p-6 rounded-2xl shadow-sm border border-[#00cc00]/30 group relative">
                   <div className="flex justify-between items-start mb-4">
-                    <img src={"https://" + "i.ibb.co/XfY9PF0W/path1-52.png"} alt="Anónimo" className="h-7 w-auto object-contain" />
+                    <img src={anonimoImg} alt="Anónimo" className="h-7 w-auto object-contain" />
                     <div className="flex items-center space-x-3">
                       <span className="text-xs text-[#00cc00]/60 font-medium">{formatDate(sug.timestamp)}</span>
                       <button onClick={() => handleDelete(sug.id)} className="text-[#00cc00] transition-all duration-300 hover:scale-[1.2] hover:drop-shadow-[0_0_8px_rgba(0,204,0,0.9)] cursor-pointer"><Trash2 size={16} /></button>
@@ -249,11 +259,11 @@ export default function App() {
           <div className="bg-[#002400] p-8 pb-4 text-[#00cc00]">
             <div className="flex justify-between items-start mb-6">
               {!imgError ? (
-                <img src="https://i.ibb.co/7t0q5bDf/rect175.png" alt="Logo" className="h-10 w-auto object-contain" onError={() => setImgError(true)} />
+                <img src={iconLeftImg} alt="Logo" className="h-10 w-auto object-contain" onError={() => setImgError(true)} />
               ) : (
                 <div className="flex items-center justify-center bg-[#011a00] text-[#00cc00] px-4 py-2 rounded-3xl border border-[#00cc00]"><TreePine size={16} /></div>
               )}
-              <img src="https://i.ibb.co/9HxKWZcR/path1-1-2.png" alt="Icon" className="h-10 w-auto object-contain" />
+              <img src={iconRightImg} alt="Icon" className="h-10 w-auto object-contain" />
             </div>
             <h1 className="text-3xl font-bold tracking-tight text-[#00cc00] text-center uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Caixa de Sugestões</h1>
           </div>
@@ -269,7 +279,7 @@ export default function App() {
                 <Plus size={36} strokeWidth={1.5} />
               </button>
               <h2 className="text-3xl font-bold text-[#00cc00] mb-8 tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sucesso!</h2>
-              <img src={"https://" + "i.ibb.co/tMsdd22W/check.png"} alt="Sucesso" className="w-24 h-24 mb-8 object-contain" />
+              <img src={checkImg} alt="Sucesso" className="w-24 h-24 mb-8 object-contain" />
               <div className="text-[#00cc00]/80 text-[13px] sm:text-[15px] w-full max-w-full leading-relaxed flex flex-col items-center px-1">
                 <span className="text-center w-full">Sua mensagem foi recebida com sucesso e registrada de forma anônima.</span>
                 <span className="text-center w-full mt-1">Agradecemos sua colaboração!</span>
@@ -300,7 +310,7 @@ export default function App() {
                   {status === 'submitting' ? (
                     <div className="px-12 h-14 bg-[#002400] border border-[#00cc00]/20 rounded-2xl flex items-center justify-center"><div className="w-6 h-6 border-2 border-[#00cc00]/40 border-t-[#00cc00] rounded-full animate-spin"></div></div>
                   ) : (
-                    <img src={"https://" + "i.ibb.co/YBjWxZxW/rect161.png"} alt="Sugerir" className="h-auto max-h-16 object-contain" />
+                    <img src={sugerirImg} alt="Sugerir" className="h-auto max-h-16 object-contain" />
                   )}
                 </button>
               </div>
@@ -313,7 +323,7 @@ export default function App() {
         <div className="mt-8 text-center flex flex-col items-center">
           <button onClick={() => { setIsAdminView(true); setIsStarHovered(false); }} onMouseEnter={() => setIsStarHovered(true)} onMouseLeave={() => setIsStarHovered(false)} className="p-3 transition-all group outline-none active:scale-90">
             <div className="w-8 h-8 flex items-center justify-center transition-all">
-              <img src="https://i.ibb.co/svv8TDXm/star.png" alt="Admin" className={`w-5 h-5 object-contain transition-all duration-300 ${isStarHovered ? 'scale-125 opacity-100' : 'opacity-70 scale-100'}`} style={{ filter: `invert(53%) sepia(91%) saturate(3015%) hue-rotate(88deg) brightness(112%) contrast(127%) ${isStarHovered ? 'drop-shadow(0 0 12px #00cc00)' : ''}` }} />
+              <img src={estrelaImg} alt="Admin" className={`w-5 h-5 object-contain transition-all duration-300 ${isStarHovered ? 'scale-125 opacity-100' : 'opacity-70 scale-100'}`} style={{ filter: `invert(53%) sepia(91%) saturate(3015%) hue-rotate(88deg) brightness(112%) contrast(127%) ${isStarHovered ? 'drop-shadow(0 0 12px #00cc00)' : ''}` }} />
             </div>
           </button>
         </div>
