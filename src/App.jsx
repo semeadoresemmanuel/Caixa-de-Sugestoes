@@ -4,15 +4,15 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, deleteDoc, doc, enableIndexedDbPersistence } from 'firebase/firestore';
 
-import cadeadoImg from './assets/cadeado.png';
-import boxImg from './assets/box.png';
-import sairImg from './assets/sair.png';
-import anonimoImg from './assets/anonimo.png';
-import iconLeftImg from './assets/icon_left.png';
-import iconRightImg from './assets/icon_right.png';
-import checkImg from './assets/check.png';
-import sugerirImg from './assets/sugerir.png';
-import estrelaImg from './assets/estrela.png';
+import cadeadoImg from './assets/cadeado.svg';
+import boxImg from './assets/caixa.svg';
+import sairImg from './assets/sair.svg';
+import anonimoImg from './assets/anonimo.svg';
+import iconLeftImg from './assets/icone_esquerda_home.svg';
+import iconRightImg from './assets/icone_direita_home.svg';
+import checkImg from './assets/feito.svg';
+import sugerirImg from './assets/sugerir.svg';
+import estrelaImg from './assets/admin.svg';
 
 // 1. Configuração do Firebase
 const firebaseConfig = typeof __firebase_config !== 'undefined' 
