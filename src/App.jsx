@@ -222,7 +222,8 @@ export default function App() {
                   <Trash2 size={24} />
                 </button>
               )}
-              <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); setIsStarHovered(false); }} className="bg-[#002400] border border-[#00cc00]/20 p-2 rounded-lg hover:bg-[#00cc00]/10 transition flex items-center justify-center cursor-pointer" title="Sair">
+              <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); setIsStarHovered(false); }} className="bg-[#002400] border border-[#00cc00]/20 px-4 py-2 rounded-lg hover:bg-[#00cc00]/10 transition flex items-center justify-center space-x-3 cursor-pointer" title="Sair">
+                <span className="text-sm font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sair</span>
                 <img src={sairImg} alt="Sair" className="w-6 h-6 object-contain" />
               </button>
             </div>
