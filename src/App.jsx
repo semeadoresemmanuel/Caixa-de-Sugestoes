@@ -53,7 +53,7 @@ export default function App() {
   const [isPasscodeFocused, setIsPasscodeFocused] = useState(false);
 
   // Senha ofuscada em Base64 para evitar a leitura direta do código-fonte (Inspecionar F12)
-  const ADMIN_PASSCODE = atob('Q1NTZW1lYWRvcmVz');
+  const ADMIN_PASSCODE = atob('Q1NTZW1lYWRvcmVzKg==');
 
   // 2. Autenticação
   useEffect(() => {
