@@ -274,7 +274,7 @@ export default function App() {
               <button
                 onClick={() => setStatus('idle')}
                 className="flex items-center justify-center w-16 h-16 mb-8 border border-[#00cc00]/40 rounded-full text-[#00cc00] hover:bg-[#00cc00]/10 hover:border-[#00cc00] hover:shadow-[0_0_15px_rgba(0,204,0,0.3)] transition-all active:scale-95"
-                title="Nova Sugestão"
+                title="Fazer Nova Sugestão"
               >
                 <Plus size={36} strokeWidth={1.5} />
               </button>
@@ -321,7 +321,7 @@ export default function App() {
       
       {status !== 'success' && (
         <div className="mt-8 text-center flex flex-col items-center">
-          <button onClick={() => { setIsAdminView(true); setIsStarHovered(false); }} onMouseEnter={() => setIsStarHovered(true)} onMouseLeave={() => setIsStarHovered(false)} className="p-3 transition-all group outline-none active:scale-90" title="Acessar área do administrador">
+          <button onClick={() => { setIsAdminView(true); setIsStarHovered(false); }} onMouseEnter={() => setIsStarHovered(true)} onMouseLeave={() => setIsStarHovered(false)} className="p-3 transition-all group outline-none active:scale-90" title="Área do Administrador">
             <div className="w-8 h-8 flex items-center justify-center transition-all">
               <img src={estrelaImg} alt="Admin" className={`w-5 h-5 object-contain transition-all duration-300 ${isStarHovered ? 'scale-125 opacity-100' : 'opacity-70 scale-100'}`} style={{ filter: `invert(53%) sepia(91%) saturate(3015%) hue-rotate(88deg) brightness(112%) contrast(127%) ${isStarHovered ? 'drop-shadow(0 0 12px #00cc00)' : ''}` }} />
             </div>
