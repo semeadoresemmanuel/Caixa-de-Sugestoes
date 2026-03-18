@@ -215,15 +215,15 @@ export default function App() {
               </div>
               <h1 className="text-xl font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sugestões</h1>
             </div>
-            <div className="flex flex-row gap-3">
+            <div className="flex flex-row gap-2">
               {suggestions.length > 0 && (
-                <button onClick={handleDeleteAll} className="bg-[#002400] border border-[#00cc00]/20 p-2 rounded-lg hover:bg-[#00cc00]/10 text-[#00cc00] transition flex items-center justify-center hover:drop-shadow-[0_0_8px_rgba(0,204,0,0.5)] cursor-pointer" title="Excluir Tudo">
-                  <Trash2 size={24} />
+                <button onClick={handleDeleteAll} className="bg-[#002400] border border-[#00cc00]/20 p-1.5 rounded-lg hover:bg-[#00cc00]/10 text-[#00cc00] transition flex items-center justify-center hover:drop-shadow-[0_0_8px_rgba(0,204,0,0.5)] cursor-pointer" title="Excluir Tudo">
+                  <Trash2 size={20} />
                 </button>
               )}
-              <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); setIsStarHovered(false); }} className="bg-[#002400] border border-[#00cc00]/20 px-4 py-2 rounded-lg hover:bg-[#00cc00]/10 transition flex items-center justify-center space-x-3 cursor-pointer" title="Sair">
+              <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); setIsStarHovered(false); }} className="bg-[#002400] border border-[#00cc00]/20 px-3 py-1.5 rounded-lg hover:bg-[#00cc00]/10 transition flex items-center justify-center space-x-2 cursor-pointer" title="Sair">
                 <span className="text-sm font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sair</span>
-                <img src={sairImg} alt="Sair" className="w-6 h-6 object-contain" />
+                <img src={sairImg} alt="Sair" className="w-5 h-5 object-contain" />
               </button>
             </div>
           </div>
