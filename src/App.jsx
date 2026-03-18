@@ -212,7 +212,7 @@ export default function App() {
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-8 bg-[#002400] border border-[#00cc00]/20 p-3 sm:p-4 rounded-2xl shadow-sm">
             <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
-              <img src={boxImg} alt="Caixa" className="w-9 h-9 sm:w-11 sm:h-11 object-contain" />
+              <img src={boxImg} alt="Caixa" className="w-7 h-7 sm:w-9 sm:h-9 object-contain" />
               <h1 className="text-base sm:text-xl font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sugestões</h1>
             </div>
             <div className="flex flex-row gap-1.5 sm:gap-2 shrink-0">
@@ -239,7 +239,7 @@ export default function App() {
                     <img src={anonimoImg} alt="Anónimo" className="h-7 w-auto object-contain" />
                     <div className="flex items-center space-x-3">
                       <span className="text-xs text-[#00cc00]/60 font-medium">{formatDate(sug.timestamp)}</span>
-                      <button onClick={() => handleDelete(sug.id)} className="text-[#00cc00] transition-all duration-300 hover:scale-[1.2] hover:drop-shadow-[0_0_8px_rgba(0,204,0,0.9)] cursor-pointer"><Trash2 size={16} /></button>
+                      <button onClick={() => handleDelete(sug.id)} className="text-[#00cc00] transition-all duration-300 hover:scale-[1.2] hover:drop-shadow-[0_0_8px_rgba(0,204,0,0.9)] cursor-pointer" title="Excluir"><Trash2 size={16} /></button>
                     </div>
                   </div>
                   <p className="text-[#00cc00] whitespace-pre-wrap leading-relaxed">{sug.text}</p>
@@ -306,7 +306,7 @@ export default function App() {
                 </div>
               )}
               <div className="flex justify-center w-full">
-                <button type="submit" disabled={status === 'submitting' || !text.trim()} className={`flex items-center justify-center transition-all duration-300 ${ (status === 'submitting' || !text.trim()) ? 'cursor-not-allowed opacity-40' : 'opacity-100 hover:scale-[1.05] active:scale-[0.95] hover:drop-shadow-[0_0_15px_rgba(0,204,0,0.8)]' }`}>
+                <button type="submit" disabled={status === 'submitting' || !text.trim()} className={`flex items-center justify-center transition-all duration-300 ${ (status === 'submitting' || !text.trim()) ? 'cursor-not-allowed opacity-40' : 'opacity-100 hover:scale-[1.05] active:scale-[0.95] hover:drop-shadow-[0_0_15px_rgba(0,204,0,0.8)]' }`} title="Sugerir">
                   {status === 'submitting' ? (
                     <div className="px-12 h-14 bg-[#002400] border border-[#00cc00]/20 rounded-2xl flex items-center justify-center"><div className="w-6 h-6 border-2 border-[#00cc00]/40 border-t-[#00cc00] rounded-full animate-spin"></div></div>
                   ) : (
@@ -321,7 +321,7 @@ export default function App() {
       
       {status !== 'success' && (
         <div className="mt-8 text-center flex flex-col items-center">
-          <button onClick={() => { setIsAdminView(true); setIsStarHovered(false); }} onMouseEnter={() => setIsStarHovered(true)} onMouseLeave={() => setIsStarHovered(false)} className="p-3 transition-all group outline-none active:scale-90">
+          <button onClick={() => { setIsAdminView(true); setIsStarHovered(false); }} onMouseEnter={() => setIsStarHovered(true)} onMouseLeave={() => setIsStarHovered(false)} className="p-3 transition-all group outline-none active:scale-90" title="Acessar área do administrador">
             <div className="w-8 h-8 flex items-center justify-center transition-all">
               <img src={estrelaImg} alt="Admin" className={`w-5 h-5 object-contain transition-all duration-300 ${isStarHovered ? 'scale-125 opacity-100' : 'opacity-70 scale-100'}`} style={{ filter: `invert(53%) sepia(91%) saturate(3015%) hue-rotate(88deg) brightness(112%) contrast(127%) ${isStarHovered ? 'drop-shadow(0 0 12px #00cc00)' : ''}` }} />
             </div>
