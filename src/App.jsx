@@ -170,8 +170,8 @@ export default function App() {
       return (
         <div className="min-h-screen bg-[#002400] flex flex-col items-center justify-center p-4" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
           <div className="bg-[#002400] p-8 rounded-2xl border border-[#00cc00]/20 shadow-sm w-full max-w-md">
-            <div className="flex items-center justify-center w-16 h-16 bg-transparent border border-[#00cc00]/40 rounded-full mb-6 mx-auto text-[#00cc00]">
-              <img src={cadeadoImg} alt="Cadeado" className="w-7 h-7 object-contain" />
+            <div className="flex items-center justify-center mb-6 mx-auto text-[#00cc00]">
+              <img src={cadeadoImg} alt="Cadeado" className="w-12 h-12 object-contain" />
             </div>
             <h2 className="text-3xl font-bold text-center text-[#00cc00] mb-2 tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Área Restrita</h2>
             <p className="text-center text-[#00cc00]/80 mb-8 text-sm">Digite a senha de Administrador</p>
@@ -189,17 +189,17 @@ export default function App() {
                 <button 
                   type="button" 
                   onClick={() => { setIsAdminView(false); setIsStarHovered(false); setPasscode(''); setPasscodeError(false); }} 
-                  className={`flex items-center justify-center w-14 h-14 rounded-full border transition-all duration-300 active:scale-95 ${passcode.length === 0 ? 'border-[#00cc00] text-[#00cc00] shadow-[0_0_15px_rgba(0,204,0,0.5)]' : 'border-[#00cc00]/40 text-[#00cc00]/60 hover:text-[#00cc00] hover:border-[#00cc00] hover:shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
+                  className={`flex items-center justify-center transition-all duration-300 active:scale-95 ${passcode.length === 0 ? 'opacity-100 drop-shadow-[0_0_15px_rgba(0,204,0,0.5)]' : 'opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
                   title="Voltar"
                 >
-                  <img src={setaEsquerdaImg} alt="Voltar" className="w-7 h-7 object-contain" />
+                  <img src={setaEsquerdaImg} alt="Voltar" className="w-12 h-12 object-contain" />
                 </button>
                 <button 
                   type="submit" 
-                  className={`flex items-center justify-center w-14 h-14 rounded-full border transition-all duration-300 active:scale-95 ${passcode.length > 0 ? 'border-[#00cc00] text-[#00cc00] shadow-[0_0_15px_rgba(0,204,0,0.5)] hover:scale-105' : 'border-[#00cc00]/40 text-[#00cc00]/60 hover:text-[#00cc00] hover:border-[#00cc00] hover:shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
+                  className={`flex items-center justify-center transition-all duration-300 active:scale-95 ${passcode.length > 0 ? 'opacity-100 drop-shadow-[0_0_15px_rgba(0,204,0,0.5)] hover:scale-105' : 'opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
                   title="Entrar"
                 >
-                  <img src={setaDireitaImg} alt="Entrar" className="w-7 h-7 object-contain" />
+                  <img src={setaDireitaImg} alt="Entrar" className="w-12 h-12 object-contain" />
                 </button>
               </div>
             </form>
