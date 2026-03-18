@@ -208,22 +208,22 @@ export default function App() {
     return (
       <div className="min-h-screen bg-[#002400] p-4 md:p-8" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
         <div className="max-w-3xl mx-auto">
-          <div className="flex items-center justify-between mb-8 bg-[#002400] border border-[#00cc00]/20 p-4 rounded-2xl shadow-sm">
-            <div className="flex items-center space-x-3">
-              <div className="bg-[#002400] border border-[#00cc00]/20 p-2 rounded-lg text-[#00cc00]">
-                <img src={boxImg} alt="Icon" className="w-6 h-6 object-contain" />
+          <div className="flex items-center justify-between mb-8 bg-[#002400] border border-[#00cc00]/20 p-3 sm:p-4 rounded-2xl shadow-sm">
+            <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+              <div className="bg-[#002400] border border-[#00cc00]/20 p-1.5 sm:p-2 rounded-lg text-[#00cc00]">
+                <img src={boxImg} alt="Icon" className="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
               </div>
-              <h1 className="text-xl font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sugestões</h1>
+              <h1 className="text-base sm:text-xl font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sugestões</h1>
             </div>
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-row gap-1.5 sm:gap-2 shrink-0">
               {suggestions.length > 0 && (
                 <button onClick={handleDeleteAll} className="bg-[#002400] border border-[#00cc00]/20 p-1.5 rounded-lg hover:bg-[#00cc00]/10 text-[#00cc00] transition flex items-center justify-center hover:drop-shadow-[0_0_8px_rgba(0,204,0,0.5)] cursor-pointer" title="Excluir Tudo">
-                  <Trash2 size={20} />
+                  <Trash2 size={16} className="sm:w-5 sm:h-5" />
                 </button>
               )}
-              <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); setIsStarHovered(false); }} className="bg-[#002400] border border-[#00cc00]/20 px-3 py-1.5 rounded-lg hover:bg-[#00cc00]/10 transition flex items-center justify-center space-x-2 cursor-pointer" title="Sair">
-                <span className="text-sm font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sair</span>
-                <img src={sairImg} alt="Sair" className="w-5 h-5 object-contain" />
+              <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); setIsStarHovered(false); }} className="bg-[#002400] border border-[#00cc00]/20 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-[#00cc00]/10 transition flex items-center justify-center space-x-1 sm:space-x-2 cursor-pointer" title="Sair">
+                <span className="text-xs sm:text-sm font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sair</span>
+                <img src={sairImg} alt="Sair" className="w-3.5 h-3.5 sm:w-5 sm:h-5 object-contain" />
               </button>
             </div>
           </div>
