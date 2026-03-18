@@ -13,6 +13,8 @@ import iconRightImg from './assets/icone_direita_home.svg';
 import checkImg from './assets/feito.svg';
 import sugerirImg from './assets/sugerir.svg';
 import estrelaImg from './assets/admin.svg';
+import setaEsquerdaImg from './assets/seta_esquerda_voltar.svg';
+import setaDireitaImg from './assets/seta_direita_entrar.svg';
 
 // 1. Configuração do Firebase
 const firebaseConfig = typeof __firebase_config !== 'undefined' 
@@ -190,14 +192,14 @@ export default function App() {
                   className={`flex items-center justify-center w-14 h-14 rounded-full border transition-all duration-300 active:scale-95 ${passcode.length === 0 ? 'border-[#00cc00] text-[#00cc00] shadow-[0_0_15px_rgba(0,204,0,0.5)]' : 'border-[#00cc00]/40 text-[#00cc00]/60 hover:text-[#00cc00] hover:border-[#00cc00] hover:shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
                   title="Voltar"
                 >
-                  <ChevronLeft size={28} strokeWidth={2.5} />
+                  <img src={setaEsquerdaImg} alt="Voltar" className="w-7 h-7 object-contain" />
                 </button>
                 <button 
                   type="submit" 
                   className={`flex items-center justify-center w-14 h-14 rounded-full border transition-all duration-300 active:scale-95 ${passcode.length > 0 ? 'border-[#00cc00] text-[#00cc00] shadow-[0_0_15px_rgba(0,204,0,0.5)] hover:scale-105' : 'border-[#00cc00]/40 text-[#00cc00]/60 hover:text-[#00cc00] hover:border-[#00cc00] hover:shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
                   title="Entrar"
                 >
-                  <ChevronRight size={28} strokeWidth={2.5} />
+                  <img src={setaDireitaImg} alt="Entrar" className="w-7 h-7 object-contain" />
                 </button>
               </div>
             </form>
