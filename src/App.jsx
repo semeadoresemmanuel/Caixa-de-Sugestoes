@@ -212,9 +212,7 @@ export default function App() {
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-8 bg-[#002400] border border-[#00cc00]/20 p-3 sm:p-4 rounded-2xl shadow-sm">
             <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
-              <div className="bg-[#002400] border border-[#00cc00]/20 p-1.5 sm:p-2 rounded-lg text-[#00cc00]">
-                <img src={boxImg} alt="Icon" className="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
-              </div>
+              <img src={boxImg} alt="Caixa" className="w-9 h-9 sm:w-11 sm:h-11 object-contain" />
               <h1 className="text-base sm:text-xl font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sugestões</h1>
             </div>
             <div className="flex flex-row gap-1.5 sm:gap-2 shrink-0">
