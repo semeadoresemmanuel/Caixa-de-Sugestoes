@@ -171,7 +171,7 @@ export default function App() {
         <div className="min-h-screen bg-[#002400] flex flex-col items-center justify-center p-4" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
           <div className="bg-[#002400] p-8 rounded-2xl border border-[#00cc00]/20 shadow-sm w-full max-w-md">
             <div className="flex items-center justify-center mb-6 mx-auto text-[#00cc00]">
-              <img src={cadeadoImg} alt="Cadeado" className="w-12 h-12 object-contain" />
+              <img src={cadeadoImg} alt="Cadeado" className="w-10 h-10 object-contain" />
             </div>
             <h2 className="text-3xl font-bold text-center text-[#00cc00] mb-2 tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Área Restrita</h2>
             <p className="text-center text-[#00cc00]/80 mb-8 text-sm">Digite a senha de Administrador</p>
