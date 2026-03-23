@@ -194,13 +194,15 @@ export default function App() {
                   placeholder={passcodeError ? "DIGITE NOVAMENTE" : (isPasscodeFocused ? "" : "SENHA")}
                   className={`w-full px-4 py-3 pr-14 rounded-xl border focus:ring-2 bg-[#002400] outline-none transition text-center tracking-widest text-lg ${passcodeError ? 'border-red-500 placeholder:text-red-500 focus:ring-red-500 text-red-500' : 'border-[#00cc00]/50 placeholder:text-[#00cc00]/50 focus:ring-[#00cc00] text-[#00cc00]'}`}
                 />
-                <button 
-                  type="submit" 
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center transition-all duration-300 active:scale-95 ${passcode.length > 0 ? 'opacity-100 drop-shadow-[0_0_15px_rgba(0,204,0,0.5)] hover:scale-105' : 'opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
-                  title="Entrar"
-                >
-                  <img src={entrarImg} alt="Entrar" className="h-7 w-auto object-contain" />
-                </button>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                  <button 
+                    type="submit" 
+                    className={`flex items-center justify-center transition-all duration-300 active:scale-95 ${passcode.length > 0 ? 'opacity-100 drop-shadow-[0_0_15px_rgba(0,204,0,0.5)] hover:scale-105' : 'opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
+                    title="Entrar"
+                  >
+                    <img src={entrarImg} alt="Entrar" className="h-7 object-contain block" />
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -221,9 +223,9 @@ export default function App() {
                   <Trash2 size={16} className="sm:w-5 sm:h-5" />
                 </button>
               )}
-              <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); setIsStarHovered(false); }} className="bg-[#002400] border border-[#00cc00]/20 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-[#00cc00]/10 transition flex items-center justify-center space-x-1 sm:space-x-2 cursor-pointer" title="Sair">
+              <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); setIsStarHovered(false); }} className="bg-[#002400] border border-[#00cc00]/20 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-[#00cc00]/10 transition flex items-center justify-center space-x-1.5 sm:space-x-2 cursor-pointer" title="Sair">
                 <span className="text-xs sm:text-sm font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sair</span>
-                <img src={sairImg} alt="Sair" className="w-3.5 h-3.5 sm:w-5 sm:h-5 object-contain" />
+                <img src={sairImg} alt="Sair" className="h-3.5 sm:h-4 w-auto object-contain block" />
               </button>
             </div>
           </div>
