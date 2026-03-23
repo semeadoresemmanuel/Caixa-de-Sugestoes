@@ -194,13 +194,15 @@ export default function App() {
                   placeholder={passcodeError ? "DIGITE NOVAMENTE" : (isPasscodeFocused ? "" : "SENHA")}
                   className={`w-full px-4 py-3 pr-14 rounded-xl border focus:ring-2 bg-[#002400] outline-none transition text-center tracking-widest text-lg ${passcodeError ? 'border-red-500 placeholder:text-red-500 focus:ring-red-500 text-red-500' : 'border-[#00cc00]/50 placeholder:text-[#00cc00]/50 focus:ring-[#00cc00] text-[#00cc00]'}`}
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
                   <button 
                     type="submit" 
-                    className={`flex items-center justify-center transition-all duration-300 active:scale-95 ${passcode.length > 0 ? 'opacity-100 drop-shadow-[0_0_15px_rgba(0,204,0,0.5)] hover:scale-105' : 'opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
+                    className={`flex items-center justify-center transition-all duration-300 active:scale-95 active:brightness-125 active:drop-shadow-[0_0_25px_rgba(0,204,0,1)] ${passcode.length > 0 ? 'opacity-100 drop-shadow-[0_0_15px_rgba(0,204,0,0.5)] hover:scale-105' : 'opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
                     title="Entrar"
                   >
-                    <img src={entrarImg} alt="Entrar" className="h-7 object-contain block" />
+                    <div className="w-5 h-8 flex items-center justify-center">
+                      <img src={entrarImg} alt="Entrar" className="w-full h-full object-contain pointer-events-none" />
+                    </div>
                   </button>
                 </div>
               </div>
