@@ -13,8 +13,8 @@ import iconRightImg from './assets/icone_direita_home.svg';
 import checkImg from './assets/feito.svg';
 import sugerirImg from './assets/sugerir.svg';
 import estrelaImg from './assets/admin.svg';
-import setaEsquerdaImg from './assets/seta_esquerda_voltar.svg';
-import setaDireitaImg from './assets/seta_direita_entrar.svg';
+import fecharImg from './assets/fechar.svg';
+import entrarImg from './assets/entrar.svg';
 
 // 1. Configuração do Firebase
 const firebaseConfig = typeof __firebase_config !== 'undefined' 
@@ -169,37 +169,37 @@ export default function App() {
     if (!isAuthenticatedAdmin) {
       return (
         <div className="min-h-screen bg-[#002400] flex flex-col items-center justify-center p-4" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
-          <div className="bg-[#002400] p-8 rounded-2xl border border-[#00cc00]/20 shadow-sm w-full max-w-md">
+          <div className="relative bg-[#002400] p-8 rounded-2xl border border-[#00cc00]/20 shadow-sm w-full max-w-md">
+            <button 
+              type="button" 
+              onClick={() => { setIsAdminView(false); setIsStarHovered(false); setPasscode(''); setPasscodeError(false); }} 
+              className="absolute top-4 right-4 flex items-center justify-center transition-all duration-300 active:scale-95 opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]"
+              title="Fechar"
+            >
+              <img src={fecharImg} alt="Fechar" className="w-6 h-6 object-contain" />
+            </button>
             <div className="flex items-center justify-center mb-6 mx-auto text-[#00cc00]">
               <img src={cadeadoImg} alt="Cadeado" className="w-10 h-10 object-contain" />
             </div>
             <h2 className="text-3xl font-bold text-center text-[#00cc00] mb-2 tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Área Restrita</h2>
             <p className="text-center text-[#00cc00]/80 mb-8 text-sm">Digite a senha de Administrador</p>
             <form onSubmit={handleAdminLogin} className="space-y-4">
-              <input
-                type="text"
-                value={passcode}
-                onChange={(e) => { setPasscode(e.target.value); setPasscodeError(false); }}
-                onFocus={() => setIsPasscodeFocused(true)}
-                onBlur={() => setIsPasscodeFocused(false)}
-                placeholder={passcodeError ? "DIGITE NOVAMENTE" : (isPasscodeFocused ? "" : "SENHA")}
-                className={`w-full px-4 py-3 rounded-xl border focus:ring-2 bg-[#002400] outline-none transition text-center tracking-widest text-lg ${passcodeError ? 'border-red-500 placeholder:text-red-500 focus:ring-red-500 text-red-500' : 'border-[#00cc00]/50 placeholder:text-[#00cc00]/50 focus:ring-[#00cc00] text-[#00cc00]'}`}
-              />
-              <div className="flex justify-center items-center space-x-6 pt-4">
-                <button 
-                  type="button" 
-                  onClick={() => { setIsAdminView(false); setIsStarHovered(false); setPasscode(''); setPasscodeError(false); }} 
-                  className={`flex items-center justify-center transition-all duration-300 active:scale-95 ${passcode.length === 0 ? 'opacity-100 drop-shadow-[0_0_15px_rgba(0,204,0,0.5)]' : 'opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
-                  title="Voltar"
-                >
-                  <img src={setaEsquerdaImg} alt="Voltar" className="w-12 h-12 object-contain" />
-                </button>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={passcode}
+                  onChange={(e) => { setPasscode(e.target.value); setPasscodeError(false); }}
+                  onFocus={() => setIsPasscodeFocused(true)}
+                  onBlur={() => setIsPasscodeFocused(false)}
+                  placeholder={passcodeError ? "DIGITE NOVAMENTE" : (isPasscodeFocused ? "" : "SENHA")}
+                  className={`w-full px-4 py-3 pr-14 rounded-xl border focus:ring-2 bg-[#002400] outline-none transition text-center tracking-widest text-lg ${passcodeError ? 'border-red-500 placeholder:text-red-500 focus:ring-red-500 text-red-500' : 'border-[#00cc00]/50 placeholder:text-[#00cc00]/50 focus:ring-[#00cc00] text-[#00cc00]'}`}
+                />
                 <button 
                   type="submit" 
-                  className={`flex items-center justify-center transition-all duration-300 active:scale-95 ${passcode.length > 0 ? 'opacity-100 drop-shadow-[0_0_15px_rgba(0,204,0,0.5)] hover:scale-105' : 'opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center transition-all duration-300 active:scale-95 ${passcode.length > 0 ? 'opacity-100 drop-shadow-[0_0_15px_rgba(0,204,0,0.5)] hover:scale-105' : 'opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
                   title="Entrar"
                 >
-                  <img src={setaDireitaImg} alt="Entrar" className="w-12 h-12 object-contain" />
+                  <img src={entrarImg} alt="Entrar" className="w-8 h-8 object-contain" />
                 </button>
               </div>
             </form>
