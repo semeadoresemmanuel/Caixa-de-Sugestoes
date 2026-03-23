@@ -225,9 +225,11 @@ export default function App() {
                   <Trash2 size={16} className="sm:w-5 sm:h-5" />
                 </button>
               )}
-              <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); setIsStarHovered(false); }} className="bg-[#002400] border border-[#00cc00]/20 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-[#00cc00]/10 transition flex items-center justify-center space-x-1.5 sm:space-x-2 cursor-pointer" title="Sair">
+              <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); setIsStarHovered(false); }} className="bg-[#002400] border border-[#00cc00]/20 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-[#00cc00]/10 transition flex items-center justify-center space-x-1.5 sm:space-x-2 cursor-pointer outline-none active:scale-95" title="Sair">
                 <span className="text-xs sm:text-sm font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sair</span>
-                <img src={sairImg} alt="Sair" className="h-3.5 sm:h-4 w-auto object-contain block" />
+                <div className="flex items-center justify-center h-4 sm:h-5 shrink-0">
+                  <img src={sairImg} alt="Sair" className="h-full w-auto object-contain shrink-0 drop-shadow-[0_0_1px_rgba(0,204,0,0.9)] pointer-events-none" />
+                </div>
               </button>
             </div>
           </div>
