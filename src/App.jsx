@@ -13,7 +13,7 @@ import iconRightImg from './assets/icone_direita_home.svg';
 import checkImg from './assets/feito.svg';
 import sugerirImg from './assets/sugerir.svg';
 import estrelaImg from './assets/admin.svg';
-import fecharImg from './assets/fechar.svg';
+import voltarImg from './assets/voltar.svg';
 import entrarImg from './assets/entrar.svg';
 
 // 1. Configuração do Firebase
@@ -173,10 +173,10 @@ export default function App() {
             <button 
               type="button" 
               onClick={() => { setIsAdminView(false); setIsStarHovered(false); setPasscode(''); setPasscodeError(false); }} 
-              className="absolute top-4 right-4 flex items-center justify-center transition-all duration-300 active:scale-95 opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]"
-              title="Fechar"
+              className="absolute top-4 left-4 flex items-center justify-center transition-all duration-300 active:scale-95 opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]"
+              title="Voltar"
             >
-              <img src={fecharImg} alt="Fechar" className="w-6 h-6 object-contain" />
+              <img src={voltarImg} alt="Voltar" className="w-6 h-6 object-contain" />
             </button>
             <div className="flex items-center justify-center mb-6 mx-auto text-[#00cc00]">
               <img src={cadeadoImg} alt="Cadeado" className="w-10 h-10 object-contain" />
@@ -199,7 +199,7 @@ export default function App() {
                   className={`absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center transition-all duration-300 active:scale-95 ${passcode.length > 0 ? 'opacity-100 drop-shadow-[0_0_15px_rgba(0,204,0,0.5)] hover:scale-105' : 'opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
                   title="Entrar"
                 >
-                  <img src={entrarImg} alt="Entrar" className="w-8 h-8 object-contain" />
+                  <img src={entrarImg} alt="Entrar" className="h-7 w-auto object-contain" />
                 </button>
               </div>
             </form>
