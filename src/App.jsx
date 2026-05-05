@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Lock, Send, CheckCircle2, AlertCircle, MessageSquare, ChevronLeft, ChevronRight, Trash2, Shield, Box, TreePine, ArrowLeft, ArrowRight, X, Plus } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Lock, Unlock, Send, CheckCircle2, AlertCircle, MessageSquare, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Trash2, Shield, Box, TreePine, ArrowLeft, ArrowRight, X, Plus, Sun, Moon, Bold, Italic, List, Palette, User, Strikethrough, Type, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, deleteDoc, doc, enableIndexedDbPersistence } from 'firebase/firestore';
 
-import cadeadoImg from './assets/cadeado.svg';
-import boxImg from './assets/caixa.svg';
-import sairImg from './assets/sair.svg';
-import anonimoImg from './assets/anonimo.svg';
-import iconLeftImg from './assets/icone_esquerda_home.svg';
-import iconRightImg from './assets/icone_direita_home.svg';
-import checkImg from './assets/feito.svg';
-import sugerirImg from './assets/sugerir.svg';
-import estrelaImg from './assets/admin.svg';
-import voltarImg from './assets/voltar.svg';
-import entrarImg from './assets/entrar.svg';
+import cadeadoImg from './assets/padlock.svg';
+import blackBoxImg from './assets/blackbox.svg';
+import whiteBoxImg from './assets/whitebox.svg';
+import lightModeImg from './assets/light_mode.svg';
+import darkModeImg from './assets/dark_mode.svg';
+import padlockDarkImg from './assets/padlock_darkmode.svg';
+import padlockLightImg from './assets/padlock_lightmode.svg';
+import checkWhiteImg from './assets/check_white.svg';
+import checkBlackImg from './assets/check_black.svg';
+import exitImg from './assets/exit.svg';
 
 // 1. Configuração do Firebase
 const firebaseConfig = typeof __firebase_config !== 'undefined' 
@@ -44,17 +43,37 @@ export default function App() {
   const [text, setText] = useState('');
   const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  const [imgError, setImgError] = useState(false);
-  const [isStarHovered, setIsStarHovered] = useState(false);
   
   const [isAdminView, setIsAdminView] = useState(false);
-  const [isAuthenticatedAdmin, setIsAuthenticatedAdmin] = useState(false);
+  const [isAuthenticatedAdmin, setIsAuthenticatedAdmin] = useState(
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  );
   const [passcode, setPasscode] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [passcodeError, setPasscodeError] = useState(false);
   const [isPasscodeFocused, setIsPasscodeFocused] = useState(false);
+  const [showPasscode, setShowPasscode] = useState(false);
 
-  const ADMIN_PASSCODE = 'CSSemeadores*';
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+  const ADMIN_PASSCODE = 'admsemeadores*';
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
+
+  const passcodeInputRef = useRef(null);
+
+  useEffect(() => {
+    if (isAdminView && !isAuthenticatedAdmin && passcodeInputRef.current) {
+      setTimeout(() => {
+        passcodeInputRef.current.focus();
+      }, 100);
+    }
+  }, [isAdminView, isAuthenticatedAdmin]);
+
+
 
   // 2. Autenticação
   useEffect(() => {
@@ -97,10 +116,118 @@ export default function App() {
     return () => unsubscribe();
   }, [user, isAuthenticatedAdmin]);
 
+  const applyWhatsAppFormatting = (html) => {
+    // 1. Limpa formatações automáticas anteriores para permitir que a formatação "desfaça" se o marcador for apagado
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const elements = div.querySelectorAll('.wa-fmt');
+    elements.forEach(el => {
+      let textContent = el.textContent;
+      // Se o usuário apagou a palavra e sobraram apenas os marcadores fechados, apagamos os marcadores também
+      if (textContent === '**' || textContent === '****' || textContent === '__' || textContent === '~~' || textContent === '``````') {
+        textContent = '';
+      }
+      const textNode = document.createTextNode(textContent);
+      el.parentNode.replaceChild(textNode, el);
+    });
+    let cleanHtml = div.innerHTML;
+
+    // 2. Aplica as regras com a classe identificadora
+    const marker = (char) => `<span class="wa-marker" style="opacity: 0.5; font-style: normal;">${char}</span>`;
+    
+    return cleanHtml
+      .replace(/(?<!<[^>]*)\*\*(.+?)\*\*(?![^<]*>)/g, `<b class="wa-fmt">${marker('**')}$1${marker('**')}</b>`)
+      .replace(/(?<!<[^>]*)\*(.+?)\*(?![^<]*>)/g, `<b class="wa-fmt">${marker('*')}$1${marker('*')}</b>`)
+      .replace(/(?<!<[^>]*)\_(.+?)\_(?![^<]*>)/g, `<i class="wa-fmt">${marker('_')}$1${marker('_')}</i>`)
+      .replace(/(?<!<[^>]*)\~(.+?)\~(?![^<]*>)/g, `<strike class="wa-fmt">${marker('~')}$1${marker('~')}</strike>`)
+      .replace(/(?<!<[^>]*)\`{3}(.+?)\`{3}(?![^<]*>)/g, `<code class="wa-fmt" style="font-family: monospace; background: rgba(0,204,0,0.1); padding: 2px 4px; border-radius: 4px;">${marker('```')}$1${marker('```')}</code>`);
+  };
+
+  const getCaretCharacterOffsetWithin = (element) => {
+    let caretOffset = 0;
+    const doc = element.ownerDocument || element.document;
+    const win = doc.defaultView || doc.parentWindow;
+    const sel = win.getSelection();
+    if (sel.rangeCount > 0) {
+      const range = win.getSelection().getRangeAt(0);
+      const preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(element);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
+      caretOffset = preCaretRange.toString().length;
+    }
+    return caretOffset;
+  };
+
+  const setCaretPosition = (element, offset) => {
+    const doc = element.ownerDocument || element.document;
+    const win = doc.defaultView || doc.parentWindow;
+    const sel = win.getSelection();
+    const range = doc.createRange();
+    
+    let charIndex = 0, nodeStack = [element], node, foundStart = false, stop = false;
+    range.setStart(element, 0);
+    range.collapse(true);
+    
+    while (!stop && (node = nodeStack.pop())) {
+      if (node.nodeType === 3) {
+        const nextCharIndex = charIndex + node.length;
+        if (!foundStart && offset >= charIndex && offset <= nextCharIndex) {
+          range.setStart(node, offset - charIndex);
+          foundStart = true;
+        }
+        if (foundStart && offset >= charIndex && offset <= nextCharIndex) {
+          range.setEnd(node, offset - charIndex);
+          stop = true;
+        }
+        charIndex = nextCharIndex;
+      } else {
+        let i = node.childNodes.length;
+        while (i--) {
+          nodeStack.push(node.childNodes[i]);
+        }
+      }
+    }
+    sel.removeAllRanges();
+    sel.addRange(range);
+  };
+
+  const handleInput = (e) => {
+    const editor = e.currentTarget;
+    let html = editor.innerHTML;
+
+    // Se o usuário apagou tudo (e não há uma lista vazia ativa), limpa o "estilo fantasma"
+    if (editor.textContent === '' && !editor.querySelector('ul, ol, li')) {
+      if (document.queryCommandState('bold')) document.execCommand('bold', false, null);
+      if (document.queryCommandState('italic')) document.execCommand('italic', false, null);
+      if (document.queryCommandState('strikeThrough')) document.execCommand('strikeThrough', false, null);
+      document.execCommand('fontName', false, 'inherit'); 
+      if (html !== '' && html !== '<br>') {
+        editor.innerHTML = '';
+      }
+      setText('');
+      return;
+    }
+    
+    // Processa se houver símbolos de formatação ou se houver formatações prévias a serem reavaliadas (limpeza)
+    if (html.includes('*') || html.includes('_') || html.includes('~') || html.includes('```') || html.includes('wa-fmt')) {
+      const formatted = applyWhatsAppFormatting(html);
+      if (formatted !== html) {
+        const cursorOffset = getCaretCharacterOffsetWithin(editor);
+        editor.innerHTML = formatted;
+        setText(formatted);
+        setCaretPosition(editor, cursorOffset);
+        return;
+      }
+    }
+    setText(html);
+  };
+
   // 4. Enviar Sugestão
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user || !text.trim()) return;
+    const editableDiv = document.getElementById('suggestion-input');
+    const content = editableDiv ? editableDiv.innerHTML : text;
+    if (!user || !content.trim() || content === '<br>') return;
 
     setStatus('submitting');
     setErrorMessage('');
@@ -108,25 +235,70 @@ export default function App() {
     try {
       const suggestionsRef = collection(db, 'artifacts', appId, 'public', 'data', 'suggestions');
       
-      // Chama o banco. Com a persistência offline, ele salva localmente na mesma hora.
+      const formattedContent = applyWhatsAppFormatting(content);
+      
       const addPromise = addDoc(suggestionsRef, {
-        text: text.trim(),
+        text: formattedContent,
         timestamp: serverTimestamp(),
       });
       
-      // Registra possíveis erros em background caso o servidor recuse mais tarde
       addPromise.catch(error => console.error("Sincronização pendente:", error));
       
-      // UX Optimista: simula 600ms de "loading" e aprova na UI, não travando o app se estiver offline
       setTimeout(() => {
         setStatus('success');
         setText('');
+        if (editableDiv) editableDiv.innerHTML = '';
       }, 600);
 
     } catch (error) {
       setStatus('error');
       setErrorMessage(`Falha no envio: ${error.message}`);
     }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === ' ') {
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const node = range.startContainer;
+        const offset = range.startOffset;
+        
+        if (node.nodeType === 3) {
+          const textBefore = node.data.slice(0, offset);
+          // Só transforma se for um hífen isolado no início do nó ou da linha
+          const isStartOfLine = textBefore.trim() === '-' && (offset <= 2);
+          
+          if (isStartOfLine) {
+            e.preventDefault();
+            // Seleciona o hífen para apagar
+            const selectRange = document.createRange();
+            const startOfHyphen = node.data.lastIndexOf('-', offset - 1);
+            if (startOfHyphen !== -1) {
+              selectRange.setStart(node, startOfHyphen);
+              selectRange.setEnd(node, offset);
+              selection.removeAllRanges();
+              selection.addRange(selectRange);
+              
+              document.execCommand('delete', false);
+              setTimeout(() => {
+                document.execCommand('insertUnorderedList', false);
+              }, 10);
+            }
+          }
+        }
+      }
+    }
+  };
+
+  const execCommand = (command, value = null) => {
+    document.execCommand(command, false, value);
+    const editableDiv = document.getElementById('suggestion-input');
+    if (editableDiv) editableDiv.focus();
+  };
+
+  const handleColorChange = (e) => {
+    execCommand('foreColor', e.target.value);
   };
 
   const handleDelete = async (id) => {
@@ -138,10 +310,17 @@ export default function App() {
 
   const handleDeleteAll = async () => {
     if (!user || !isAuthenticatedAdmin) return;
+    setIsConfirmModalOpen(true);
+  };
+
+  const confirmDeleteAll = async () => {
     try {
       const promises = suggestions.map(sug => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'suggestions', sug.id)));
       await Promise.all(promises);
-    } catch (error) {}
+      setIsConfirmModalOpen(false);
+    } catch (error) {
+      setIsConfirmModalOpen(false);
+    }
   };
 
   const handleAdminLogin = (e) => {
@@ -168,43 +347,56 @@ export default function App() {
   if (isAdminView) {
     if (!isAuthenticatedAdmin) {
       return (
-        <div className="min-h-screen bg-[#002400] flex flex-col items-center justify-center p-4" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
-          <div className="relative bg-[#002400] p-8 rounded-2xl border border-[#00cc00]/20 shadow-sm w-full max-w-md">
+        <div className="min-h-screen flex flex-col items-center justify-start p-4 pt-8" style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--bg-color)' }}>
+          <div className="relative p-8 rounded-2xl border shadow-sm w-full max-w-md" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }}>
             <button 
               type="button" 
-              onClick={() => { setIsAdminView(false); setIsStarHovered(false); setPasscode(''); setPasscodeError(false); }} 
-              className="absolute top-4 left-4 flex items-center justify-center transition-all duration-300 active:scale-95 opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]"
+              tabIndex="-1"
+              onClick={() => { setIsAdminView(false); setPasscode(''); setPasscodeError(false); }} 
+              className="absolute top-7 left-6 flex items-center justify-center active:scale-90 opacity-100 outline-none ring-0"
+              style={{ color: 'var(--text-main)', outline: 'none' }}
               title="Voltar"
             >
-              <img src={voltarImg} alt="Voltar" className="w-6 h-6 object-contain" />
+              <ChevronLeft size={24} strokeWidth={2.5} />
             </button>
             <div className="flex items-center justify-center mb-6 mx-auto text-[#00cc00]">
               <img src={cadeadoImg} alt="Cadeado" className="w-10 h-10 object-contain" />
             </div>
-            <h2 className="text-3xl font-bold text-center text-[#00cc00] mb-2 tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Área Restrita</h2>
-            <p className="text-center text-[#00cc00]/80 mb-8 text-sm">Digite a senha de Administrador</p>
+            <h2 className="text-3xl font-bold text-center text-[#00cc00] mb-2 tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Acesso Restrito</h2>
+            <p className="text-center text-[var(--text-main)] mb-8 text-xs italic" style={{ fontFamily: "'Montserrat', sans-serif" }}>Digite a senha de <span className="font-bold">Administrador</span>:</p>
             <form onSubmit={handleAdminLogin} className="space-y-4">
               <div className="relative">
                 <input
-                  type="text"
+                  ref={passcodeInputRef}
+                  type={showPasscode ? "text" : "password"}
                   value={passcode}
                   onChange={(e) => { setPasscode(e.target.value); setPasscodeError(false); }}
                   onFocus={() => setIsPasscodeFocused(true)}
                   onBlur={() => setIsPasscodeFocused(false)}
-                  placeholder={passcodeError ? "DIGITE NOVAMENTE" : (isPasscodeFocused ? "" : "SENHA")}
-                  className={`w-full px-4 py-3 pr-14 rounded-xl border focus:ring-2 bg-[#002400] outline-none transition text-center tracking-widest text-lg ${passcodeError ? 'border-red-500 placeholder:text-red-500 focus:ring-red-500 text-red-500' : 'border-[#00cc00]/50 placeholder:text-[#00cc00]/50 focus:ring-[#00cc00] text-[#00cc00]'}`}
+                  placeholder={passcodeError ? "DIGITE NOVAMENTE" : ""}
+                  className={`w-full px-4 pl-14 py-3 pr-14 rounded-xl border outline-none transition text-center tracking-[0.2em] text-lg ${passcodeError ? 'border-red-500 placeholder:text-red-500 text-red-500' : 'placeholder:text-[var(--text-dim)]'}`}
+                  style={{ backgroundColor: 'var(--input-bg)', color: 'var(--text-main)', borderColor: 'var(--border-color)', fontFamily: "'Montserrat', sans-serif" }}
                 />
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
                   <button 
-                    type="submit" 
-                    className={`flex items-center justify-center transition-all duration-300 active:scale-95 active:brightness-125 active:drop-shadow-[0_0_25px_rgba(0,204,0,1)] ${passcode.length > 0 ? 'opacity-100 drop-shadow-[0_0_15px_rgba(0,204,0,0.5)] hover:scale-105' : 'opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_10px_rgba(0,204,0,0.2)]'}`}
-                    title="Entrar"
+                    type="button" 
+                    onClick={() => setShowPasscode(!showPasscode)}
+                    className="flex items-center justify-center p-2 rounded-lg hover:bg-[var(--primary-color)]/10 transition-all text-[var(--text-main)]"
+                    title={showPasscode ? "Ocultar Senha" : "Ver Senha"}
                   >
-                    <div className="w-5 h-8 flex items-center justify-center">
-                      <img src={entrarImg} alt="Entrar" className="w-full h-full object-contain pointer-events-none" />
-                    </div>
+                    {showPasscode ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
+              </div>
+
+              <div className="flex justify-center mt-6">
+                <button 
+                  type="submit" 
+                  className="px-10 py-3 rounded-2xl font-bold tracking-[0.2em] uppercase transition-all duration-500 border-2 bg-[#00cc00] text-[var(--bg-color)] border-[#00cc00] hover:scale-105 active:scale-95 shadow-[0_0_35px_rgba(0,204,0,0.6)]"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                >
+                  ACESSAR
+                </button>
               </div>
             </form>
           </div>
@@ -212,126 +404,230 @@ export default function App() {
       );
     }
     return (
-      <div className="min-h-screen bg-[#002400] p-4 md:p-8" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
+      <div className="min-h-screen p-4 md:p-8" style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--bg-color)' }}>
         <div className="max-w-3xl mx-auto">
-          <div className="flex items-center justify-between mb-8 bg-[#002400] border border-[#00cc00]/20 p-3 sm:p-4 rounded-2xl shadow-sm">
+          <div className="flex items-center justify-between mb-8 p-0" style={{ }}>
             <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
-              <img src={boxImg} alt="Caixa" className="w-7 h-7 sm:w-9 sm:h-9 object-contain" />
-              <h1 className="text-base sm:text-xl font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sugestões</h1>
+              <img src={isDarkMode ? blackBoxImg : whiteBoxImg} alt="Caixa" className="w-6 h-6 sm:w-7 sm:h-7 object-contain" />
+              <h1 className="text-lg sm:text-2xl font-bold uppercase" style={{ color: 'var(--text-main)', fontFamily: "'Montserrat', sans-serif" }}>SUGESTÕES</h1>
             </div>
             <div className="flex flex-row gap-1.5 sm:gap-2 shrink-0">
               {suggestions.length > 0 && (
-                <button onClick={handleDeleteAll} className="bg-[#002400] border border-[#00cc00]/20 p-1.5 rounded-lg hover:bg-[#00cc00]/10 text-[#00cc00] transition flex items-center justify-center hover:drop-shadow-[0_0_8px_rgba(0,204,0,0.5)] cursor-pointer" title="Excluir Tudo">
-                  <Trash2 size={16} className="sm:w-5 sm:h-5" />
+                <button onClick={handleDeleteAll} className="border px-2 sm:px-3 py-1.5 rounded-lg transition flex items-center justify-center space-x-1.5 sm:space-x-2 cursor-pointer outline-none active:scale-95" style={{ backgroundColor: 'var(--card-bg)', borderColor: '#ff4444', color: '#ff4444' }} title="Limpar">
+                  <span className="text-xs sm:text-sm font-bold tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Limpar</span>
+                  <Trash2 size={16} />
                 </button>
               )}
-              <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); setIsStarHovered(false); }} className="bg-[#002400] border border-[#00cc00]/20 px-2 sm:px-3 py-1.5 rounded-lg hover:bg-[#00cc00]/10 transition flex items-center justify-center space-x-1.5 sm:space-x-2 cursor-pointer outline-none active:scale-95" title="Sair">
-                <span className="text-xs sm:text-sm font-bold text-[#00cc00] tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sair</span>
-                <div className="flex items-center justify-center h-4 sm:h-5 shrink-0">
-                  <img src={sairImg} alt="Sair" className="h-full w-auto object-contain shrink-0 drop-shadow-[0_0_1px_rgba(0,204,0,0.9)] pointer-events-none" />
-                </div>
+              <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); }} className="border px-2 sm:px-3 py-1.5 rounded-lg transition flex items-center justify-center space-x-1.5 sm:space-x-2 cursor-pointer outline-none active:scale-95" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)', color: 'var(--primary-color)' }} title="Sair">
+                <span className="text-xs sm:text-sm font-bold tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sair</span>
+                <img src={exitImg} alt="Sair" className="w-3.5 h-3.5 object-contain" />
               </button>
             </div>
           </div>
           <div className="space-y-4">
             {suggestions.length === 0 ? (
-              <div className="bg-[#002400] p-12 rounded-2xl shadow-sm text-center border border-[#00cc00]/20">
-                <p className="text-[#00cc00]">Não há sugestões no momento.</p>
+              <div className="p-12 rounded-2xl shadow-sm text-center border" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }}>
+                <p style={{ color: 'var(--primary-color)' }}>Não há sugestões no momento.</p>
               </div>
             ) : (
               suggestions.map((sug) => (
-                <div key={sug.id} className="bg-[#002400] p-6 rounded-2xl shadow-sm border border-[#00cc00]/30 group relative">
-                  <div className="flex justify-between items-start mb-4">
-                    <img src={anonimoImg} alt="Anónimo" className="h-7 w-auto object-contain" />
-                    <div className="flex items-center space-x-3">
-                      <span className="text-xs text-[#00cc00]/60 font-medium">{formatDate(sug.timestamp)}</span>
-                      <button onClick={() => handleDelete(sug.id)} className="text-[#00cc00] transition-all duration-300 hover:scale-[1.2] hover:drop-shadow-[0_0_8px_rgba(0,204,0,0.9)] cursor-pointer" title="Excluir"><Trash2 size={16} /></button>
-                    </div>
+                <div key={sug.id} className="p-6 pb-14 rounded-2xl shadow-sm border group relative" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex-1"></div>
+                    <span className="text-xs font-medium" style={{ color: 'var(--text-main)' }}>{formatDate(sug.timestamp)}</span>
+                    <div className="flex-1"></div>
                   </div>
-                  <p className="text-[#00cc00] whitespace-pre-wrap leading-relaxed">{sug.text}</p>
+                  <div className="whitespace-pre-wrap leading-relaxed rich-text-content" style={{ color: 'var(--text-main)' }} dangerouslySetInnerHTML={{ __html: sug.text }} />
+                  <div className="absolute bottom-4 right-4">
+                    <button onClick={() => handleDelete(sug.id)} className="border p-1 rounded-lg transition-all duration-300 hover:scale-[1.1] cursor-pointer" style={{ color: '#ff4444', borderColor: '#ff4444' }} title="Excluir"><Trash2 size={14} /></button>
+                  </div>
                 </div>
               ))
             )}
           </div>
         </div>
+        {/* Modal de Confirmação Customizado (Admin) */}
+        {isConfirmModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+            <div 
+              className="w-full max-w-sm p-8 rounded-3xl border-2 shadow-[0_0_50px_rgba(0,0,0,0.3)] animate-in zoom-in duration-300"
+              style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }}
+            >
+              <div className="flex items-center justify-center mb-6 text-red-500">
+                <AlertCircle size={48} strokeWidth={1.5} />
+              </div>
+              <h2 className="text-2xl font-bold text-center mb-4 tracking-tight uppercase" style={{ color: 'var(--text-main)' }}>Limpar Tudo?</h2>
+              <p className="text-center mb-8 text-sm opacity-80" style={{ color: 'var(--text-main)' }}>
+                Tem certeza que deseja apagar TODAS as sugestões? Esta ação não pode ser desfeita.
+              </p>
+              <div className="flex flex-col space-y-3">
+                <button 
+                  onClick={confirmDeleteAll}
+                  className="w-full py-4 rounded-2xl font-bold tracking-[0.2em] uppercase transition-all bg-red-600 text-white hover:bg-red-700 active:scale-95 shadow-[0_0_20px_rgba(220,38,38,0.4)]"
+                >
+                  CONFIRMAR
+                </button>
+                <button 
+                  onClick={() => setIsConfirmModalOpen(false)}
+                  className="w-full py-4 rounded-2xl font-bold tracking-[0.2em] uppercase transition-all border-2 bg-[#00cc00] text-[var(--text-main)] border-[#00cc00] hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(0,204,0,0.4)]"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                >
+                  CANCELAR
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#002400] flex flex-col items-center justify-center p-4" style={{ fontFamily: "'Rajdhani', sans-serif" }}>
-      <div className="w-full max-w-[560px] overflow-hidden bg-[#002400] rounded-3xl border border-[#00cc00]/30 shadow-[0_8px_30px_rgb(0,204,0,0.1)]">
-        {status !== 'success' && (
-          <div className="bg-[#002400] p-8 pb-4 text-[#00cc00]">
-            <div className="flex justify-between items-start mb-6">
-              {!imgError ? (
-                <img src={iconLeftImg} alt="Logo" className="h-10 w-auto object-contain" onError={() => setImgError(true)} />
-              ) : (
-                <div className="flex items-center justify-center bg-[#011a00] text-[#00cc00] px-4 py-2 rounded-3xl border border-[#00cc00]"><TreePine size={16} /></div>
-              )}
-              <img src={iconRightImg} alt="Icon" className="h-10 w-auto object-contain" />
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight text-[#00cc00] text-center uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Caixa de Sugestões</h1>
-          </div>
-        )}
-        <div className={status === 'success' ? "p-10" : "p-8 pt-2"}>
-          {status === 'success' ? (
-            <div className="flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-300 min-h-[360px]">
+    <div tabIndex="-1" className="min-h-screen flex flex-col items-center justify-center p-6 outline-none border-none ring-0" style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--bg-color)', outline: 'none' }}>
+      <div tabIndex="-1" className="w-full max-w-lg animate-in fade-in slide-in-from-bottom-8 duration-700 outline-none border-none ring-0" style={{ outline: 'none' }}>
+        {status === 'success' ? (
+          <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center justify-center text-center p-12 border-2 rounded-3xl shadow-[0_0_40px_var(--primary-glow)] w-full" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }}>
               <button
                 onClick={() => setStatus('idle')}
-                className="flex items-center justify-center w-16 h-16 mb-8 border border-[#00cc00]/40 rounded-full text-[#00cc00] hover:bg-[#00cc00]/10 hover:border-[#00cc00] hover:shadow-[0_0_15px_rgba(0,204,0,0.3)] transition-all active:scale-95"
-                title="Fazer Nova Sugestão"
+                className="flex items-center justify-center mb-8 transition-all active:scale-95 outline-none border-none ring-0"
               >
-                <Plus size={36} strokeWidth={1.5} />
-              </button>
-              <h2 className="text-3xl font-bold text-[#00cc00] mb-8 tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sucesso!</h2>
-              <img src={checkImg} alt="Sucesso" className="w-24 h-24 mb-8 object-contain" />
-              <div className="text-[#00cc00]/80 text-[13px] sm:text-[15px] w-full max-w-full leading-relaxed flex flex-col items-center px-1">
-                <span className="text-center w-full">Sua mensagem foi recebida com sucesso e registrada de forma anônima.</span>
-                <span className="text-center w-full mt-1">Agradecemos sua colaboração!</span>
-              </div>
+                  {isDarkMode ? <img src={checkWhiteImg} alt="Sucesso" className="w-20 h-20 object-contain animate-in zoom-in duration-500 delay-150" /> : <img src={checkBlackImg} alt="Sucesso" className="w-20 h-20 object-contain animate-in zoom-in duration-500 delay-150" />}
+                </button>
+                <h2 className="text-3xl font-bold mb-4 tracking-tighter uppercase" style={{ fontFamily: "'Montserrat', sans-serif", color: 'var(--text-main)' }}>OBRIGADO!</h2>
+                <p className="max-w-xs text-lg opacity-80" style={{ color: 'var(--text-main)' }}>Sua sugestão foi enviada com sucesso.</p>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <p className="text-[#00cc00]/80 text-sm mb-2 text-center leading-relaxed">
-                Suas sugestões são 100% anônimas!<br/>
-                Envie ideias, elogios ou críticas.
-              </p>
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Eu sugiro..."
-                className="w-full h-40 p-4 bg-[#002400] border-2 border-[#00cc00]/30 opacity-60 hover:opacity-80 focus:opacity-100 rounded-2xl focus:outline-none focus:ring-0 focus:border-[#00cc00] resize-none transition-all duration-300 text-[#00cc00] placeholder:text-[#00cc00]/50"
-                disabled={status === 'submitting'}
-                required
+            
+            <button 
+              onClick={() => setStatus('idle')}
+              className="mt-6 px-10 py-3 rounded-2xl font-bold tracking-[0.2em] uppercase transition-all duration-500 border-2 bg-[#00cc00] text-[var(--text-main)] border-[#00cc00] hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(0,204,0,0.4)]"
+              style={{ fontFamily: "'Montserrat', sans-serif" }}
+            >
+              NOVA SUGESTÃO
+            </button>
+          </div>
+        ) : (
+          <form tabIndex="-1" onSubmit={handleSubmit} className="flex flex-col space-y-6 outline-none border-none ring-0" style={{ outline: 'none' }}>
+            <div className="relative group">
+              <div
+                id="suggestion-input"
+                contentEditable
+                onInput={handleInput}
+                onKeyDown={handleKeyDown}
+                className="w-full aspect-square pt-6 pl-9 pr-9 pb-24 border-2 rounded-3xl focus:outline-none overflow-y-auto transition-all duration-500 text-lg font-light tracking-wide shadow-[0_0_20px_rgba(0,204,0,0.1)] focus:shadow-[0_0_50px_rgba(0,204,0,0.3)] text-left whitespace-pre-wrap"
+                style={{ 
+                  backgroundColor: 'var(--card-bg)', 
+                  color: 'var(--text-main)', 
+                  borderColor: 'var(--border-color)',
+                  fontFamily: "'Roboto', sans-serif",
+                }}
               />
-              {errorMessage && (
-                <div className="flex items-center text-red-500 bg-red-900/20 p-3 rounded-xl text-xs border border-red-500/50">
-                  <AlertCircle size={14} className="mr-2 flex-shrink-0" />
-                  <p>{errorMessage}</p>
-                </div>
-              )}
-              <div className="flex justify-center w-full">
-                <button type="submit" disabled={status === 'submitting' || !text.trim()} className={`flex items-center justify-center transition-all duration-300 ${ (status === 'submitting' || !text.trim()) ? 'cursor-not-allowed opacity-40' : 'opacity-100 hover:scale-[1.05] active:scale-[0.95] hover:drop-shadow-[0_0_15px_rgba(0,204,0,0.8)]' }`} title="Sugerir">
-                  {status === 'submitting' ? (
-                    <div className="px-12 h-14 bg-[#002400] border border-[#00cc00]/20 rounded-2xl flex items-center justify-center"><div className="w-6 h-6 border-2 border-[#00cc00]/40 border-t-[#00cc00] rounded-full animate-spin"></div></div>
-                  ) : (
-                    <img src={sugerirImg} alt="Sugerir" className="h-auto max-h-16 object-contain" />
-                  )}
+              
+              {/* Linha Divisória */}
+              <div className="absolute bottom-16 left-8 right-8 h-[1px] opacity-20 pointer-events-none" style={{ backgroundColor: 'var(--text-main)' }}></div>
+              
+              {/* Toolbar de Formatação */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center space-x-1 z-10" style={{ fontFamily: "'Roboto', sans-serif" }}>
+                <button type="button" onClick={() => execCommand('bold')} className="p-2 rounded-lg hover:bg-[var(--primary-color)]/10 text-[var(--text-main)] transition-all" title="Negrito">
+                  <Bold size={18} />
+                </button>
+                <button type="button" onClick={() => execCommand('italic')} className="p-2 rounded-lg hover:bg-[var(--primary-color)]/10 text-[var(--text-main)] transition-all" title="Itálico">
+                  <Italic size={18} />
+                </button>
+                <button type="button" onClick={() => execCommand('strikeThrough')} className="p-2 rounded-lg hover:bg-[var(--primary-color)]/10 text-[var(--text-main)] transition-all" title="Tachado (~)">
+                  <Strikethrough size={18} />
+                </button>
+                <button type="button" onClick={() => execCommand('fontName', 'monospace')} className="p-2 rounded-lg hover:bg-[var(--primary-color)]/10 text-[var(--text-main)] transition-all" title="Monoespaçado (```)">
+                  <Type size={18} />
+                </button>
+                <button type="button" onClick={() => execCommand('insertUnorderedList')} className="p-2 rounded-lg hover:bg-[var(--primary-color)]/10 text-[var(--text-main)] transition-all" title="Checkpoints">
+                  <List size={18} />
                 </button>
               </div>
-            </form>
-          )}
-        </div>
-      </div>
-      
-      {status !== 'success' && (
-        <div className="mt-8 text-center flex flex-col items-center">
-          <button onClick={() => { setIsAdminView(true); setIsStarHovered(false); }} onMouseEnter={() => setIsStarHovered(true)} onMouseLeave={() => setIsStarHovered(false)} className="p-3 transition-all group outline-none active:scale-90" title="Área do Administrador">
-            <div className="w-8 h-8 flex items-center justify-center transition-all">
-              <img src={estrelaImg} alt="Admin" className={`w-5 h-5 object-contain transition-all duration-300 ${isStarHovered ? 'scale-125 opacity-100' : 'opacity-70 scale-100'}`} style={{ filter: `invert(53%) sepia(91%) saturate(3015%) hue-rotate(88deg) brightness(112%) contrast(127%) ${isStarHovered ? 'drop-shadow(0 0 12px #00cc00)' : ''}` }} />
+
+
+              <div className="absolute -top-[5.5rem] left-0 w-full flex flex-col items-center pointer-events-none">
+                  <h1 className="text-sm font-bold tracking-[0.4em] uppercase leading-none mt-4" style={{ color: 'var(--text-main)', fontFamily: "'Montserrat', sans-serif" }}>
+                    Caixa de Sugestões
+                  </h1>
+                  <span className="text-[11px] font-medium tracking-[0.8em] uppercase mt-1" style={{ color: 'var(--text-main)', fontFamily: "'Montserrat', sans-serif" }}>
+                    Anônima
+                  </span>
+                  <div className="w-40 h-[1.5px] mt-4 opacity-60" style={{ background: 'linear-gradient(to right, transparent, var(--text-main), transparent)' }}></div>
+              </div>
             </div>
-          </button>
+
+            <div className="flex items-center justify-center mt-6 space-x-6">
+              <button 
+                type="button"
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="p-3 rounded-2xl transition-all hover:scale-110 active:scale-90 border-2"
+                style={{ color: 'var(--text-main)', borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)' }}
+                title="Alternar Tema"
+              >
+                {isDarkMode ? <img src={lightModeImg} alt="Modo Claro" className="w-[22px] h-[22px] object-contain" /> : <img src={darkModeImg} alt="Modo Escuro" className="w-[22px] h-[22px] object-contain" />}
+              </button>
+
+              <button 
+                type="submit" 
+                disabled={status === 'submitting' || (!text.trim() || text === '<br>')} 
+                className={`h-[54px] font-bold tracking-[0.2em] uppercase transition-all duration-500 border-2 flex items-center justify-center ${ 
+                  status === 'submitting' 
+                  ? 'w-[54px] px-0 rounded-full bg-[#00cc00] text-[var(--text-main)] border-[#00cc00] cursor-not-allowed' 
+                  : 'w-auto px-10 rounded-2xl bg-[#00cc00] text-[var(--text-main)] border-[#00cc00] hover:scale-105 active:scale-95 shadow-[0_0_35px_rgba(0,204,0,0.6)]' 
+                } ${(!text.trim() || text === '<br>') && status !== 'submitting' ? 'opacity-100 cursor-not-allowed' : ''}`}
+                style={{ fontFamily: "'Montserrat', sans-serif" }}
+              >
+                {status === 'submitting' ? (
+                  <Loader2 size={24} className="animate-spin" />
+                ) : (
+                  "SUGERIR"
+                )}
+              </button>
+
+              <button 
+                type="button"
+                onClick={() => setIsAdminView(true)}
+                className="p-3 rounded-2xl transition-all hover:scale-110 active:scale-90 border-2"
+                style={{ color: 'var(--text-main)', borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)' }}
+                title="Área do Administrador"
+              >
+                {isDarkMode ? <img src={padlockDarkImg} alt="Admin" className="w-[22px] h-[22px] object-contain" /> : <img src={padlockLightImg} alt="Admin" className="w-[22px] h-[22px] object-contain" />}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+      {/* Modal de Confirmação Customizado (Geral - opcional para futuras ações) */}
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div 
+            className="w-full max-w-sm p-8 rounded-3xl border-2 shadow-[0_0_50px_rgba(0,0,0,0.3)] animate-in zoom-in duration-300"
+            style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }}
+          >
+            <div className="flex items-center justify-center mb-6 text-red-500">
+              <AlertCircle size={48} strokeWidth={1.5} />
+            </div>
+            <h2 className="text-2xl font-bold text-center mb-4 tracking-tight uppercase" style={{ color: 'var(--text-main)' }}>Limpar Tudo?</h2>
+            <p className="text-center mb-8 text-sm opacity-80" style={{ color: 'var(--text-main)' }}>
+              Tem certeza que deseja apagar TODAS as sugestões? Esta ação não pode ser desfeita.
+            </p>
+            <div className="flex flex-col space-y-3">
+              <button 
+                onClick={confirmDeleteAll}
+                className="w-full py-4 rounded-2xl font-bold tracking-[0.2em] uppercase transition-all bg-red-600 text-white hover:bg-red-700 active:scale-95 shadow-[0_0_20px_rgba(220,38,38,0.4)]"
+              >
+                CONFIRMAR
+              </button>
+                <button 
+                  onClick={() => setIsConfirmModalOpen(false)}
+                  className="w-full py-4 rounded-2xl font-bold tracking-[0.2em] uppercase transition-all border-2 bg-[#00cc00] text-[var(--text-main)] border-[#00cc00] hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(0,204,0,0.4)]"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                >
+                  CANCELAR
+                </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

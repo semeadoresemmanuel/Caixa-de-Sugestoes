@@ -1,10 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Montserrat:wght@400;700&family=Rajdhani:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --bg-color: #121212;
+  --card-bg: #121212;
+  --primary-color: #00cc00;
+  --primary-glow: rgba(0, 204, 0, 0.1);
+  --border-color: #00cc00;
+  --text-dim: rgba(0, 204, 0, 0.6);
+  --input-bg: #121212;
+  --text-main: #ffffff;
+}
+
+[data-theme='light'] {
+  --bg-color: #f7f7f7;
+  --card-bg: #f7f7f7;
+  --primary-color: #00cc00;
+  --primary-glow: rgba(0, 204, 0, 0.05);
+  --border-color: #00cc00;
+  --text-dim: rgba(0, 204, 0, 0.6);
+  --input-bg: #f7f7f7;
+  --text-main: #000000;
+}
+
 body {
-  background-color: #002400;
-  color: #00cc00;
+  background: var(--bg-color);
+  background-image: radial-gradient(circle at center, var(--primary-glow) 0%, transparent 100%);
+  color: var(--primary-color);
   margin: 0;
   padding: 0;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#root {
+  width: 100%;
+}
+
+*:focus, *:focus-visible {
+  outline: none !important;
+}
+
+[contentEditable]:empty:before {
+  content: attr(placeholder);
+  pointer-events: none;
+  display: block;
+  opacity: 0.2;
+}
+
+@keyframes neon-flicker {
+  0%, 100% { 
+    box-shadow: 0 0 10px var(--primary-color), inset 0 0 5px var(--primary-color);
+    opacity: 1;
+  }
+  50% { 
+    box-shadow: 0 0 25px var(--primary-color), inset 0 0 10px var(--primary-color);
+    opacity: 0.8;
+  }
+}
+
+.animate-neon-flicker {
+  animation: neon-flicker 1.5s infinite;
+}
+
+ul, ol {
+  padding-left: 2rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  list-style-type: disc !important;
+}
+
+li {
+  display: list-item !important;
+  color: var(--text-main);
+}
+
+li::marker {
+  color: var(--primary-color);
+  font-size: 1.2em;
 }
