@@ -56,6 +56,13 @@ export default function App() {
 
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [activeStyles, setActiveStyles] = useState({
+    bold: false,
+    italic: false,
+    strikeThrough: false,
+    monospace: false,
+    list: false
+  });
 
   const ADMIN_PASSCODE = 'admsemeadores*';
 
@@ -72,6 +79,24 @@ export default function App() {
       }, 100);
     }
   }, [isAdminView, isAuthenticatedAdmin]);
+
+  const updateActiveStyles = () => {
+    setActiveStyles({
+      bold: document.queryCommandState('bold'),
+      italic: document.queryCommandState('italic'),
+      strikeThrough: document.queryCommandState('strikeThrough'),
+      monospace: document.queryCommandValue('fontName') === 'monospace' || document.queryCommandValue('fontName') === '"Courier Prime"',
+      list: document.queryCommandState('insertUnorderedList')
+    });
+  };
+
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      updateActiveStyles();
+    };
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => document.removeEventListener('selectionchange', handleSelectionChange);
+  }, []);
 
 
 
@@ -220,6 +245,7 @@ export default function App() {
       }
     }
     setText(html);
+    updateActiveStyles();
   };
 
   // 4. Enviar Sugestão
@@ -280,10 +306,19 @@ export default function App() {
               selection.removeAllRanges();
               selection.addRange(selectRange);
               
-              document.execCommand('delete', false);
-              setTimeout(() => {
-                document.execCommand('insertUnorderedList', false);
-              }, 10);
+              // Apaga o hífen (insertText com vazio é mais compatível com o histórico de undo do que delete)
+              if (!document.execCommand('insertText', false, '')) {
+                // Fallback seguro se insertText falhar
+                document.execCommand('delete', false, null);
+              }
+              
+              // Aplica a lista imediatamente (sem setTimeout para evitar bloqueio de segurança em alguns navegadores)
+              document.execCommand('insertUnorderedList', false, null);
+              
+              // Força atualização da UI dos botões
+              if (typeof updateActiveStyles === 'function') {
+                updateActiveStyles();
+              }
             }
           }
         }
@@ -293,6 +328,7 @@ export default function App() {
 
   const execCommand = (command, value = null) => {
     document.execCommand(command, false, value);
+    updateActiveStyles();
     const editableDiv = document.getElementById('suggestion-input');
     if (editableDiv) editableDiv.focus();
   };
@@ -514,7 +550,7 @@ export default function App() {
                 contentEditable
                 onInput={handleInput}
                 onKeyDown={handleKeyDown}
-                className="w-full aspect-square pt-6 pl-9 pr-9 pb-24 border-2 rounded-3xl focus:outline-none overflow-y-auto transition-all duration-500 text-lg font-light tracking-wide shadow-[0_0_20px_rgba(0,204,0,0.1)] focus:shadow-[0_0_50px_rgba(0,204,0,0.3)] text-left whitespace-pre-wrap"
+                className="w-full aspect-square pt-6 pl-9 pr-9 pb-24 border-2 rounded-3xl focus:outline-none overflow-y-auto transition-all duration-500 text-lg font-normal tracking-wide shadow-[0_0_20px_rgba(0,204,0,0.1)] focus:shadow-[0_0_50px_rgba(0,204,0,0.3)] text-left whitespace-pre-wrap"
                 style={{ 
                   backgroundColor: 'var(--card-bg)', 
                   color: 'var(--text-main)', 
@@ -528,19 +564,44 @@ export default function App() {
               
               {/* Toolbar de Formatação */}
               <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center space-x-1 z-10" style={{ fontFamily: "'Roboto', sans-serif" }}>
-                <button type="button" onClick={() => execCommand('bold')} className="p-2 rounded-lg hover:bg-[var(--primary-color)]/10 text-[var(--text-main)] transition-all" title="Negrito">
+                <button 
+                  type="button" 
+                  onClick={() => execCommand('bold')} 
+                  className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.bold ? 'bg-[#00cc00] text-[#121212] shadow-[0_0_15px_rgba(0,204,0,0.6)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
+                  title="Negrito"
+                >
                   <Bold size={18} />
                 </button>
-                <button type="button" onClick={() => execCommand('italic')} className="p-2 rounded-lg hover:bg-[var(--primary-color)]/10 text-[var(--text-main)] transition-all" title="Itálico">
+                <button 
+                  type="button" 
+                  onClick={() => execCommand('italic')} 
+                  className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.italic ? 'bg-[#00cc00] text-[#121212] shadow-[0_0_15px_rgba(0,204,0,0.6)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
+                  title="Itálico"
+                >
                   <Italic size={18} />
                 </button>
-                <button type="button" onClick={() => execCommand('strikeThrough')} className="p-2 rounded-lg hover:bg-[var(--primary-color)]/10 text-[var(--text-main)] transition-all" title="Tachado (~)">
+                <button 
+                  type="button" 
+                  onClick={() => execCommand('strikeThrough')} 
+                  className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.strikeThrough ? 'bg-[#00cc00] text-[#121212] shadow-[0_0_15px_rgba(0,204,0,0.6)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
+                  title="Tachado (~)"
+                >
                   <Strikethrough size={18} />
                 </button>
-                <button type="button" onClick={() => execCommand('fontName', 'monospace')} className="p-2 rounded-lg hover:bg-[var(--primary-color)]/10 text-[var(--text-main)] transition-all" title="Monoespaçado (```)">
+                <button 
+                  type="button" 
+                  onClick={() => execCommand('fontName', activeStyles.monospace ? 'inherit' : 'monospace')} 
+                  className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.monospace ? 'bg-[#00cc00] text-[#121212] shadow-[0_0_15px_rgba(0,204,0,0.6)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
+                  title="Monoespaçado (```)"
+                >
                   <Type size={18} />
                 </button>
-                <button type="button" onClick={() => execCommand('insertUnorderedList')} className="p-2 rounded-lg hover:bg-[var(--primary-color)]/10 text-[var(--text-main)] transition-all" title="Checkpoints">
+                <button 
+                  type="button" 
+                  onClick={() => execCommand('insertUnorderedList')} 
+                  className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.list ? 'bg-[#00cc00] text-[#121212] shadow-[0_0_15px_rgba(0,204,0,0.6)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
+                  title="Checkpoints"
+                >
                   <List size={18} />
                 </button>
               </div>
