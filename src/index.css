@@ -85,3 +85,25 @@ li::marker {
   color: var(--primary-color);
   font-size: 1.2em;
 }
+
+/* Melhoria na visibilidade do Negrito */
+b, strong {
+  font-weight: 800 !important;
+  color: var(--text-main);
+  text-shadow: 0 0 1px var(--primary-glow);
+}
+
+[data-theme='dark'] b, [data-theme='dark'] strong {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.rich-text-content b, .rich-text-content strong {
+  color: var(--primary-color);
+}
+
+/* Estilo para o marcador do WhatsApp no editor */
+.wa-marker {
+  color: var(--primary-color) !important;
+  font-weight: normal !important;
+}
