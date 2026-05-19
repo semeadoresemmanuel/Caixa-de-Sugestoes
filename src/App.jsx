@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Lock, Unlock, Send, CheckCircle2, AlertCircle, MessageSquare, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Trash2, Shield, Box, TreePine, ArrowLeft, ArrowRight, X, Plus, Sun, Moon, Bold, Italic, List, Palette, User, Strikethrough, Type, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Lock, Unlock, Send, CheckCircle2, AlertCircle, MessageSquare, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Trash2, Shield, Box, TreePine, ArrowLeft, ArrowRight, X, Plus, Sun, Moon, Bold, Italic, List, Palette, User, Underline, Type, Eye, EyeOff, Loader2, ListOrdered } from 'lucide-react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, deleteDoc, doc, enableIndexedDbPersistence } from 'firebase/firestore';
@@ -59,9 +59,10 @@ export default function App() {
   const [activeStyles, setActiveStyles] = useState({
     bold: false,
     italic: false,
-    strikeThrough: false,
+    underline: false,
     monospace: false,
-    list: false
+    list: false,
+    orderedList: false
   });
 
   const ADMIN_PASSCODE = 'admsemeadores*';
@@ -84,9 +85,10 @@ export default function App() {
     setActiveStyles({
       bold: document.queryCommandState('bold'),
       italic: document.queryCommandState('italic'),
-      strikeThrough: document.queryCommandState('strikeThrough'),
+      underline: document.queryCommandState('underline'),
       monospace: document.queryCommandValue('fontName') === 'monospace' || document.queryCommandValue('fontName') === '"Courier Prime"',
-      list: document.queryCommandState('insertUnorderedList')
+      list: document.queryCommandState('insertUnorderedList'),
+      orderedList: document.queryCommandState('insertOrderedList')
     });
   };
 
@@ -224,7 +226,7 @@ export default function App() {
     if (editor.textContent === '' && !editor.querySelector('ul, ol, li')) {
       if (document.queryCommandState('bold')) document.execCommand('bold', false, null);
       if (document.queryCommandState('italic')) document.execCommand('italic', false, null);
-      if (document.queryCommandState('strikeThrough')) document.execCommand('strikeThrough', false, null);
+      if (document.queryCommandState('underline')) document.execCommand('underline', false, null);
       document.execCommand('fontName', false, 'inherit'); 
       if (html !== '' && html !== '<br>') {
         editor.innerHTML = '';
@@ -410,7 +412,7 @@ export default function App() {
                   onFocus={() => setIsPasscodeFocused(true)}
                   onBlur={() => setIsPasscodeFocused(false)}
                   placeholder={passcodeError ? "DIGITE NOVAMENTE" : ""}
-                  className={`w-full px-4 pl-14 py-3 pr-14 rounded-xl border outline-none transition text-center tracking-[0.2em] text-lg ${passcodeError ? 'border-red-500 placeholder:text-red-500 text-red-500' : 'placeholder:text-[var(--text-dim)]'}`}
+                  className={`w-full px-4 pl-14 py-3 pr-14 rounded-xl border outline-none transition text-center tracking-widest italic text-lg ${passcodeError ? 'border-red-500 placeholder:text-red-500 text-red-500' : 'placeholder:text-[var(--text-dim)]'}`}
                   style={{ backgroundColor: 'var(--input-bg)', color: 'var(--text-main)', borderColor: 'var(--border-color)', fontFamily: "'Montserrat', sans-serif" }}
                 />
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
@@ -520,7 +522,7 @@ export default function App() {
 
   return (
     <div tabIndex="-1" className="min-h-screen flex flex-col items-center justify-center p-6 outline-none border-none ring-0" style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--bg-color)', outline: 'none' }}>
-      <div tabIndex="-1" className="w-full max-w-lg animate-in fade-in slide-in-from-bottom-8 duration-700 outline-none border-none ring-0" style={{ outline: 'none' }}>
+      <div tabIndex="-1" className="w-full animate-in fade-in slide-in-from-bottom-8 duration-700 outline-none border-none ring-0" style={{ maxWidth: 'min(32rem, calc(100vh - 16rem))', outline: 'none' }}>
         {status === 'success' ? (
           <div className="flex flex-col items-center">
             <div className="flex flex-col items-center justify-center text-center p-12 border-2 rounded-3xl shadow-[0_0_40px_var(--primary-glow)] w-full" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }}>
@@ -544,6 +546,16 @@ export default function App() {
           </div>
         ) : (
           <form tabIndex="-1" onSubmit={handleSubmit} className="flex flex-col space-y-6 outline-none border-none ring-0" style={{ outline: 'none' }}>
+            <div className="w-full flex flex-col items-center pointer-events-none mb-2">
+                <h1 className="text-sm sm:text-base font-bold tracking-[0.2em] sm:tracking-[0.4em] uppercase leading-none text-center" style={{ color: 'var(--text-main)', fontFamily: "'Montserrat', sans-serif" }}>
+                  Caixa de Sugestões
+                </h1>
+                <span className="text-[11px] font-medium tracking-[0.6em] sm:tracking-[0.8em] uppercase mt-2 text-center" style={{ color: 'var(--text-main)', fontFamily: "'Montserrat', sans-serif" }}>
+                  Anônima
+                </span>
+                <div className="w-40 h-[1.5px] mt-4 opacity-60" style={{ background: 'linear-gradient(to right, transparent, var(--text-main), transparent)' }}></div>
+            </div>
+
             <div className="relative group">
               <div
                 id="suggestion-input"
@@ -582,11 +594,11 @@ export default function App() {
                 </button>
                 <button 
                   type="button" 
-                  onClick={() => execCommand('strikeThrough')} 
-                  className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.strikeThrough ? 'bg-[#00cc00] text-[#121212] shadow-[0_0_15px_rgba(0,204,0,0.6)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
-                  title="Tachado (~)"
+                  onClick={() => execCommand('underline')} 
+                  className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.underline ? 'bg-[#00cc00] text-[#121212] shadow-[0_0_15px_rgba(0,204,0,0.6)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
+                  title="Sublinhado"
                 >
-                  <Strikethrough size={18} />
+                  <Underline size={18} />
                 </button>
                 <button 
                   type="button" 
@@ -604,17 +616,14 @@ export default function App() {
                 >
                   <List size={18} />
                 </button>
-              </div>
-
-
-              <div className="absolute -top-[5.5rem] left-0 w-full flex flex-col items-center pointer-events-none">
-                  <h1 className="text-sm font-bold tracking-[0.4em] uppercase leading-none mt-4" style={{ color: 'var(--text-main)', fontFamily: "'Montserrat', sans-serif" }}>
-                    Caixa de Sugestões
-                  </h1>
-                  <span className="text-[11px] font-medium tracking-[0.8em] uppercase mt-1" style={{ color: 'var(--text-main)', fontFamily: "'Montserrat', sans-serif" }}>
-                    Anônima
-                  </span>
-                  <div className="w-40 h-[1.5px] mt-4 opacity-60" style={{ background: 'linear-gradient(to right, transparent, var(--text-main), transparent)' }}></div>
+                <button 
+                  type="button" 
+                  onClick={() => execCommand('insertOrderedList')} 
+                  className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.orderedList ? 'bg-[#00cc00] text-[#121212] shadow-[0_0_15px_rgba(0,204,0,0.6)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
+                  title="Numeração"
+                >
+                  <ListOrdered size={18} />
+                </button>
               </div>
             </div>
 
@@ -635,8 +644,8 @@ export default function App() {
                 className={`h-[54px] font-bold tracking-[0.2em] uppercase transition-all duration-500 border-2 flex items-center justify-center ${ 
                   status === 'submitting' 
                   ? 'w-[54px] px-0 rounded-full bg-[#00cc00] text-[var(--text-main)] border-[#00cc00] cursor-not-allowed' 
-                  : 'w-auto px-10 rounded-2xl bg-[#00cc00] text-[var(--text-main)] border-[#00cc00] hover:scale-105 active:scale-95 shadow-[0_0_35px_rgba(0,204,0,0.6)]' 
-                } ${(!text.trim() || text === '<br>') && status !== 'submitting' ? 'opacity-100 cursor-not-allowed' : ''}`}
+                  : `w-auto px-10 rounded-2xl bg-[#00cc00] text-[var(--text-main)] border-[#00cc00] ${(!text.trim() || text === '<br>') ? 'opacity-60 cursor-not-allowed' : 'hover:scale-105 active:scale-95 shadow-[0_0_35px_rgba(0,204,0,0.6)]'}` 
+                }`}
                 style={{ fontFamily: "'Montserrat', sans-serif" }}
               >
                 {status === 'submitting' ? (
