@@ -70,7 +70,7 @@ body {
 }
 
 ul, ol {
-  padding-left: 2rem;
+  padding-left: 1.2rem;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
@@ -88,9 +88,15 @@ li {
   color: var(--text-main);
 }
 
-li::marker {
+ul li::marker {
   color: var(--primary-color);
   font-size: 1.2em;
+}
+
+ol li::marker {
+  color: var(--primary-color);
+  font-size: 0.95em;
+  font-weight: bold;
 }
 
 /* Melhoria na visibilidade do Negrito */
