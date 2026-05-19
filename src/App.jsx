@@ -88,6 +88,30 @@ export default function App() {
   }, [isDarkMode]);
 
   const updateActiveStyles = () => {
+    const editor = document.getElementById('suggestion-input');
+    if (!editor) return;
+
+    const selection = window.getSelection();
+    let isInside = false;
+    if (selection && selection.rangeCount > 0) {
+      const anchorNode = selection.anchorNode;
+      if (anchorNode) {
+        isInside = editor.contains(anchorNode);
+      }
+    }
+
+    if (!isInside) {
+      setActiveStyles({
+        bold: false,
+        italic: false,
+        underline: false,
+        monospace: false,
+        list: false,
+        orderedList: false
+      });
+      return;
+    }
+
     setActiveStyles({
       bold: document.queryCommandState('bold'),
       italic: document.queryCommandState('italic'),
