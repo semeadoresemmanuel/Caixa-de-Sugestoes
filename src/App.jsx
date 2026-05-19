@@ -547,7 +547,7 @@ export default function App() {
   }
 
   return (
-    <div tabIndex="-1" className="min-h-screen flex flex-col items-center justify-center p-6 outline-none border-none ring-0" style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--bg-color)', outline: 'none' }}>
+    <div tabIndex="-1" className="h-[100dvh] overflow-hidden flex flex-col items-center justify-center p-6 outline-none border-none ring-0" style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--bg-color)', outline: 'none' }}>
       <div tabIndex="-1" className="w-full animate-in fade-in slide-in-from-bottom-8 duration-700 outline-none border-none ring-0" style={{ maxWidth: 'min(32rem, calc(100vh - 16rem))', outline: 'none' }}>
         {status === 'success' ? (
           <div className="flex flex-col items-center">
