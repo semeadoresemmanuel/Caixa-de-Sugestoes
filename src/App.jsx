@@ -222,6 +222,32 @@ export default function App() {
     const editor = e.currentTarget;
     let html = editor.innerHTML;
 
+    // Mobile/Universal support for "- " auto-list detection
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const node = range.startContainer;
+      const offset = range.startOffset;
+      if (node.nodeType === 3) {
+        const textBefore = node.data.slice(0, offset);
+        if ((textBefore.endsWith('- ') || textBefore.endsWith('-\u00A0')) && textBefore.trim() === '-') {
+          const selectRange = document.createRange();
+          selectRange.setStart(node, offset - 2);
+          selectRange.setEnd(node, offset);
+          selection.removeAllRanges();
+          selection.addRange(selectRange);
+          
+          if (!document.execCommand('insertText', false, '')) {
+            document.execCommand('delete', false, null);
+          }
+          document.execCommand('insertUnorderedList', false, null);
+          setText(editor.innerHTML);
+          updateActiveStyles();
+          return;
+        }
+      }
+    }
+
     // Se o usuário apagou tudo (e não há uma lista vazia ativa), limpa o "estilo fantasma"
     if (editor.textContent === '' && !editor.querySelector('ul, ol, li')) {
       if (document.queryCommandState('bold')) document.execCommand('bold', false, null);
