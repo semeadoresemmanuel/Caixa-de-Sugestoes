@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Lock, Unlock, Send, CheckCircle2, AlertCircle, MessageSquare, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Trash2, Shield, Box, TreePine, ArrowLeft, ArrowRight, X, Plus, Sun, Moon, Bold, Italic, List, Palette, User, Underline, Type, Eye, EyeOff, Loader2, ListOrdered } from 'lucide-react';
+import { AlertCircle, ChevronLeft, Trash2, Bold, Italic, List, Underline, Type, Eye, EyeOff, Loader2, ListOrdered } from 'lucide-react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, deleteDoc, doc, enableIndexedDbPersistence } from 'firebase/firestore';
+import { motion, AnimatePresence } from 'framer-motion';
 
-import cadeadoImg from './assets/padlock.svg';
+const cn = (...classes) => classes.filter(Boolean).join(' ');
+
+
+
+
 import blackBoxImg from './assets/blackbox.svg';
 import whiteBoxImg from './assets/whitebox.svg';
 import lightModeImg from './assets/light_mode.svg';
@@ -48,11 +53,21 @@ export default function App() {
   const [isAuthenticatedAdmin, setIsAuthenticatedAdmin] = useState(
     window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   );
-  const [passcode, setPasscode] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const [passcodeError, setPasscodeError] = useState(false);
-  const [isPasscodeFocused, setIsPasscodeFocused] = useState(false);
-  const [showPasscode, setShowPasscode] = useState(false);
+
+  // Auth Modal States
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [authError, setAuthError] = useState(false);
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
+
+  const isAdmin = isAuthenticatedAdmin;
+  const setIsAdmin = (val) => {
+    setIsAuthenticatedAdmin(val);
+    if (val) {
+      setIsAdminView(true);
+    }
+  };
 
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -66,20 +81,11 @@ export default function App() {
   });
 
   const ADMIN_PASSCODE = 'admsemeadores*';
+  const darkMode = isDarkMode;
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
-
-  const passcodeInputRef = useRef(null);
-
-  useEffect(() => {
-    if (isAdminView && !isAuthenticatedAdmin && passcodeInputRef.current) {
-      setTimeout(() => {
-        passcodeInputRef.current.focus();
-      }, 100);
-    }
-  }, [isAdminView, isAuthenticatedAdmin]);
 
   const updateActiveStyles = () => {
     setActiveStyles({
@@ -387,18 +393,6 @@ export default function App() {
     }
   };
 
-  const handleAdminLogin = (e) => {
-    e.preventDefault();
-    if (passcode === ADMIN_PASSCODE) {
-      setIsAuthenticatedAdmin(true);
-      setPasscodeError(false);
-      setPasscode('');
-    } else {
-      setPasscodeError(true);
-      setPasscode(''); 
-    }
-  };
-
   const formatDate = (timestamp) => {
     if (!timestamp || typeof timestamp.toDate !== 'function') return 'Agora mesmo';
     const date = timestamp.toDate();
@@ -408,67 +402,9 @@ export default function App() {
     }).format(date);
   };
 
-  if (isAdminView) {
-    if (!isAuthenticatedAdmin) {
-      return (
-        <div className="min-h-screen flex flex-col items-center justify-start p-4 pt-8" style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--bg-color)' }}>
-          <div className="relative p-8 rounded-2xl border shadow-sm w-full max-w-md" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }}>
-            <button 
-              type="button" 
-              tabIndex="-1"
-              onClick={() => { setIsAdminView(false); setPasscode(''); setPasscodeError(false); }} 
-              className="absolute top-7 left-6 flex items-center justify-center active:scale-90 opacity-100 outline-none ring-0"
-              style={{ color: 'var(--text-main)', outline: 'none' }}
-              title="Voltar"
-            >
-              <ChevronLeft size={24} strokeWidth={2.5} />
-            </button>
-            <div className="flex items-center justify-center mb-6 mx-auto text-[#00cc00]">
-              <img src={cadeadoImg} alt="Cadeado" className="w-10 h-10 object-contain" />
-            </div>
-            <h2 className="text-3xl font-bold text-center text-[#00cc00] mb-2 tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Acesso Restrito</h2>
-            <p className="text-center text-[var(--text-main)] mb-8 text-xs italic" style={{ fontFamily: "'Montserrat', sans-serif" }}>Digite a senha de <span className="font-bold">Administrador</span>:</p>
-            <form onSubmit={handleAdminLogin} className="space-y-4">
-              <div className="relative">
-                <input
-                  ref={passcodeInputRef}
-                  type={showPasscode ? "text" : "password"}
-                  value={passcode}
-                  onChange={(e) => { setPasscode(e.target.value); setPasscodeError(false); }}
-                  onFocus={() => setIsPasscodeFocused(true)}
-                  onBlur={() => setIsPasscodeFocused(false)}
-                  placeholder={passcodeError ? "DIGITE NOVAMENTE" : ""}
-                  className={`w-full px-4 pl-14 py-3 pr-14 rounded-xl border outline-none transition text-center tracking-widest italic text-lg ${passcodeError ? 'border-red-500 placeholder:text-red-500 text-red-500' : 'placeholder:text-[var(--text-dim)]'}`}
-                  style={{ backgroundColor: 'var(--input-bg)', color: 'var(--text-main)', borderColor: 'var(--border-color)', fontFamily: "'Montserrat', sans-serif" }}
-                />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
-                  <button 
-                    type="button" 
-                    onClick={() => setShowPasscode(!showPasscode)}
-                    className="flex items-center justify-center p-2 rounded-lg hover:bg-[var(--primary-color)]/10 transition-all text-[var(--text-main)]"
-                    title={showPasscode ? "Ocultar Senha" : "Ver Senha"}
-                  >
-                    {showPasscode ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex justify-center mt-6">
-                <button 
-                  type="submit" 
-                  className="px-10 py-3 rounded-2xl font-bold tracking-[0.2em] uppercase transition-all duration-500 border-2 bg-[#00cc00] text-[var(--bg-color)] border-[#00cc00] hover:scale-105 active:scale-95 shadow-[0_0_35px_rgba(0,204,0,0.6)]"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
-                >
-                  ACESSAR
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      );
-    }
+  if (isAdminView && isAuthenticatedAdmin) {
     return (
-      <div className="min-h-screen p-4 md:p-8" style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--bg-color)' }}>
+      <div className="p-4 md:p-8" style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--bg-color)', height: '100dvh', overflowY: 'auto' }}>
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-8 p-0" style={{ }}>
             <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
@@ -683,7 +619,13 @@ export default function App() {
 
               <button 
                 type="button"
-                onClick={() => setIsAdminView(true)}
+                onClick={() => {
+                  if (isAuthenticatedAdmin) {
+                    setIsAdminView(true);
+                  } else {
+                    setIsAuthModalOpen(true);
+                  }
+                }}
                 className="p-3 rounded-2xl transition-all hover:scale-110 active:scale-90 border-2"
                 style={{ color: 'var(--text-main)', borderColor: 'var(--border-color)', backgroundColor: 'var(--card-bg)' }}
                 title="Área do Administrador"
@@ -726,6 +668,121 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Auth Modal (Custom In-App Password Area) */}
+      <AnimatePresence>
+        {isAuthModalOpen && (
+          <div className="fixed inset-0 z-[60] flex flex-col items-center justify-start p-4 pt-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setIsAuthModalOpen(false)}
+              className="absolute inset-0 bg-background/60 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="relative w-full max-w-[300px] bg-card border border-border p-4 pt-6 rounded-[40px] shadow-2xl text-center"
+            >
+              {/* Back Button */}
+              <button 
+                type="button"
+                onClick={() => setIsAuthModalOpen(false)}
+                className={cn(
+                  "absolute top-6 left-6 p-1 transition-colors hover:text-primary",
+                  darkMode ? "text-[#f7f7f7ff]" : "text-[#09090B]"
+                )}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              <div className="mb-5 flex justify-center">
+                <img 
+                  src={darkMode ? padlockDarkImg : padlockLightImg} 
+                  alt="Cadeado" 
+                  className="w-9 h-9 object-contain" 
+                />
+              </div>
+              <h2 className="text-xl font-display font-bold uppercase tracking-widest text-foreground mb-1">Acesso Restrito</h2>
+              <p className={cn(
+                "text-[10px] mb-6 leading-relaxed",
+                darkMode ? "text-white" : "text-black"
+              )}>
+                Digite a senha para entrar no<br />
+                <strong className="italic">MODO ADMINISTRADOR</strong>
+              </p>
+              
+              <div className="space-y-4">
+                <div className="relative">
+                  <input
+                    type={showAdminPassword ? "text" : "password"}
+                    autoFocus
+                    placeholder=""
+                    value={adminPassword}
+                    onChange={(e) => {
+                      setAdminPassword(e.target.value);
+                      setAuthError(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        if (adminPassword === 'admsemeadores*') {
+                          setIsAdmin(true);
+                          setIsAuthModalOpen(false);
+                        } else {
+                          setAuthError(true);
+                        }
+                      }
+                    }}
+                    className={cn(
+                      "w-full bg-muted border rounded-2xl px-12 py-4 text-center text-lg tracking-widest focus:outline-none transition-all",
+                      darkMode ? "text-white" : "text-black",
+                      authError ? "border-destructive ring-1 ring-destructive" : "border-border focus:border-primary/50"
+                    )}
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowAdminPassword(!showAdminPassword)}
+                    className={cn(
+                      "absolute right-4 top-1/2 -translate-y-1/2 hover:text-primary transition-colors z-10",
+                      darkMode ? "text-white" : "text-black"
+                    )}
+                  >
+                    {showAdminPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                  {authError && (
+                    <motion.p 
+                      initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
+                      className="text-xs text-destructive font-bold mt-2 uppercase tracking-tighter"
+                    >
+                      Senha Incorreta! Tente novamente.
+                    </motion.p>
+                  )}
+                </div>
+
+                <div className="pt-4">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (adminPassword === 'admsemeadores*') {
+                        setIsAdmin(true);
+                        setIsAuthModalOpen(false);
+                      } else {
+                        setAuthError(true);
+                      }
+                    }}
+                    className={cn(
+                      "w-full bg-primary font-display font-bold uppercase py-4 rounded-2xl shadow-lg shadow-primary/20 transition-all",
+                      darkMode ? "text-white" : "text-black"
+                    )}
+                  >
+                    Acessar
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
