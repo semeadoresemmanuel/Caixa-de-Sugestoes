@@ -404,22 +404,22 @@ export default function App() {
 
   if (isAdminView && isAuthenticatedAdmin) {
     return (
-      <div className="p-4 md:p-8" style={{ fontFamily: "'Montserrat', sans-serif", backgroundColor: 'var(--bg-color)', height: '100dvh', overflowY: 'auto' }}>
+      <div className="p-4 md:p-8" style={{ fontFamily: "'Space Grotesk', sans-serif", backgroundColor: 'var(--bg-color)', height: '100dvh', overflowY: 'auto' }}>
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-8 p-0" style={{ }}>
             <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
               <img src={isDarkMode ? blackBoxImg : whiteBoxImg} alt="Caixa" className="w-6 h-6 sm:w-7 sm:h-7 object-contain" />
-              <h1 className="text-lg sm:text-2xl font-bold uppercase" style={{ color: 'var(--text-main)', fontFamily: "'Montserrat', sans-serif" }}>SUGESTÕES</h1>
+              <h1 className="text-lg sm:text-2xl font-bold uppercase" style={{ color: 'var(--text-main)', fontFamily: "'Space Grotesk', sans-serif" }}>SUGESTÕES</h1>
             </div>
             <div className="flex flex-row gap-1.5 sm:gap-2 shrink-0">
               {suggestions.length > 0 && (
                 <button onClick={handleDeleteAll} className="border px-2 sm:px-3 py-1.5 rounded-lg transition flex items-center justify-center space-x-1.5 sm:space-x-2 cursor-pointer outline-none active:scale-95" style={{ backgroundColor: 'var(--card-bg)', borderColor: '#ff4444', color: '#ff4444' }} title="Limpar">
-                  <span className="text-xs sm:text-sm font-bold tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Limpar</span>
+                  <span className="text-xs sm:text-sm font-bold tracking-tight uppercase" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Limpar</span>
                   <Trash2 size={16} />
                 </button>
               )}
               <button onClick={() => { setIsAdminView(false); setIsAuthenticatedAdmin(false); }} className="border px-2 sm:px-3 py-1.5 rounded-lg transition flex items-center justify-center space-x-1.5 sm:space-x-2 cursor-pointer outline-none active:scale-95" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)', color: 'var(--primary-color)' }} title="Sair">
-                <span className="text-xs sm:text-sm font-bold tracking-tight uppercase" style={{ fontFamily: "'Montserrat', sans-serif" }}>Sair</span>
+                <span className="text-xs sm:text-sm font-bold tracking-tight uppercase" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Sair</span>
                 <img src={exitImg} alt="Sair" className="w-3.5 h-3.5 object-contain" />
               </button>
             </div>
@@ -470,7 +470,7 @@ export default function App() {
                 <button 
                   onClick={() => setIsConfirmModalOpen(false)}
                   className="w-full py-4 rounded-2xl font-bold tracking-[0.2em] uppercase transition-all border-2 bg-[#00cc00] text-[var(--text-main)] border-[#00cc00] hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(0,204,0,0.4)]"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 >
                   CANCELAR
                 </button>
@@ -608,7 +608,7 @@ export default function App() {
                   ? 'w-[54px] px-0 rounded-full bg-[#00cc00] text-[var(--text-main)] border-[#00cc00] cursor-not-allowed' 
                   : `w-auto px-10 rounded-2xl bg-[#00cc00] text-[var(--text-main)] border-[#00cc00] ${(!text.trim() || text === '<br>') ? 'opacity-60 cursor-not-allowed' : 'hover:scale-105 active:scale-95 shadow-[0_0_35px_rgba(0,204,0,0.6)]'}` 
                 }`}
-                style={{ fontFamily: "'Montserrat', sans-serif" }}
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               >
                 {status === 'submitting' ? (
                   <Loader2 size={24} className="animate-spin" />
@@ -683,6 +683,7 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               className="relative w-full max-w-[300px] bg-card border border-border p-4 pt-6 rounded-[40px] shadow-2xl text-center"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
               {/* Back Button */}
               <button 
@@ -703,7 +704,7 @@ export default function App() {
                   className="w-9 h-9 object-contain" 
                 />
               </div>
-              <h2 className="text-xl font-display font-bold uppercase tracking-widest text-foreground mb-1">Acesso Restrito</h2>
+              <h2 className="text-xl font-bold uppercase tracking-widest text-foreground mb-1">Acesso Restrito</h2>
               <p className={cn(
                 "text-[10px] mb-6 leading-relaxed",
                 darkMode ? "text-white" : "text-black"
@@ -734,10 +735,11 @@ export default function App() {
                       }
                     }}
                     className={cn(
-                      "w-full bg-muted border rounded-2xl px-12 py-4 text-center text-lg tracking-widest focus:outline-none transition-all",
+                      "w-full bg-muted border rounded-2xl px-12 py-4 text-center text-lg tracking-widest focus:outline-none transition-all italic",
                       darkMode ? "text-white" : "text-black",
                       authError ? "border-destructive ring-1 ring-destructive" : "border-border focus:border-primary/50"
                     )}
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                   />
                   <button 
                     type="button"
@@ -771,7 +773,7 @@ export default function App() {
                       }
                     }}
                     className={cn(
-                      "w-full bg-primary font-display font-bold uppercase py-4 rounded-2xl shadow-lg shadow-primary/20 transition-all",
+                      "w-full bg-primary font-bold uppercase py-4 rounded-2xl shadow-lg shadow-primary/20 transition-all",
                       darkMode ? "text-white" : "text-black"
                     )}
                   >
