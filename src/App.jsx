@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AlertCircle, ChevronLeft, Trash2, Bold, Italic, List, Underline, Type, Eye, EyeOff, Loader2, ListOrdered } from 'lucide-react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
@@ -61,7 +61,6 @@ export default function App() {
   const [authError, setAuthError] = useState(false);
   const [showAdminPassword, setShowAdminPassword] = useState(false);
 
-  const isAdmin = isAuthenticatedAdmin;
   const setIsAdmin = (val) => {
     setIsAuthenticatedAdmin(val);
     if (val) {
@@ -252,7 +251,7 @@ export default function App() {
     const editor = e.currentTarget;
     let html = editor.innerHTML;
 
-    // Mobile/Universal support for "- " auto-list detection
+    // Mobile/Universal support for "- ", "1. ", "1- ", "1 - " auto-list detection
     const selection = window.getSelection();
     if (selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
@@ -274,6 +273,40 @@ export default function App() {
           setText(editor.innerHTML);
           updateActiveStyles();
           return;
+        } else {
+          // Padrões de numeração ordenada
+          const orderedTriggers = [
+            { text: '1. ', trim: '1.' },
+            { text: '1.\u00A0', trim: '1.' },
+            { text: '1- ', trim: '1-' },
+            { text: '1-\u00A0', trim: '1-' },
+            { text: '1 - ', trim: '1 -' },
+            { text: '1 -\u00A0', trim: '1 -' }
+          ];
+          
+          let matchedTrigger = null;
+          for (const trigger of orderedTriggers) {
+            if (textBefore.endsWith(trigger.text) && textBefore.trim() === trigger.trim) {
+              matchedTrigger = trigger;
+              break;
+            }
+          }
+          
+          if (matchedTrigger) {
+            const selectRange = document.createRange();
+            selectRange.setStart(node, offset - matchedTrigger.text.length);
+            selectRange.setEnd(node, offset);
+            selection.removeAllRanges();
+            selection.addRange(selectRange);
+            
+            if (!document.execCommand('insertText', false, '')) {
+              document.execCommand('delete', false, null);
+            }
+            document.execCommand('insertOrderedList', false, null);
+            setText(editor.innerHTML);
+            updateActiveStyles();
+            return;
+          }
         }
       }
     }
@@ -350,10 +383,22 @@ export default function App() {
         
         if (node.nodeType === 3) {
           const textBefore = node.data.slice(0, offset);
-          // Só transforma se for um hífen isolado no início do nó ou da linha
-          const isStartOfLine = textBefore.trim() === '-' && (offset <= 2);
+          // Só transforma se for um hífen ou prefixo de numeração isolado no início do nó ou da linha
+          const isStartOfLineUnordered = textBefore.trim() === '-' && (offset <= 2);
           
-          if (isStartOfLine) {
+          let isStartOfLineOrdered = false;
+          let matchedPrefix = null;
+          const orderedPrefixes = ['1.', '1-', '1 -'];
+          
+          for (const prefix of orderedPrefixes) {
+            if (textBefore.trim() === prefix && offset <= prefix.length + 1) {
+              isStartOfLineOrdered = true;
+              matchedPrefix = prefix;
+              break;
+            }
+          }
+          
+          if (isStartOfLineUnordered) {
             e.preventDefault();
             // Seleciona o hífen para apagar
             const selectRange = document.createRange();
@@ -364,14 +409,33 @@ export default function App() {
               selection.removeAllRanges();
               selection.addRange(selectRange);
               
-              // Apaga o hífen (insertText com vazio é mais compatível com o histórico de undo do que delete)
+              if (!document.execCommand('insertText', false, '')) {
+                document.execCommand('delete', false, null);
+              }
+              document.execCommand('insertUnorderedList', false, null);
+              if (typeof updateActiveStyles === 'function') {
+                updateActiveStyles();
+              }
+            }
+          } else if (isStartOfLineOrdered && matchedPrefix) {
+            e.preventDefault();
+            // Seleciona o prefixo para apagar
+            const selectRange = document.createRange();
+            const startOfPrefix = node.data.lastIndexOf(matchedPrefix, offset - 1);
+            if (startOfPrefix !== -1) {
+              selectRange.setStart(node, startOfPrefix);
+              selectRange.setEnd(node, offset);
+              selection.removeAllRanges();
+              selection.addRange(selectRange);
+              
+              // Apaga o prefixo
               if (!document.execCommand('insertText', false, '')) {
                 // Fallback seguro se insertText falhar
                 document.execCommand('delete', false, null);
               }
               
-              // Aplica a lista imediatamente (sem setTimeout para evitar bloqueio de segurança em alguns navegadores)
-              document.execCommand('insertUnorderedList', false, null);
+              // Aplica a numeração imediatamente
+              document.execCommand('insertOrderedList', false, null);
               
               // Força atualização da UI dos botões
               if (typeof updateActiveStyles === 'function') {
@@ -660,38 +724,7 @@ export default function App() {
           </form>
         )}
       </div>
-      {/* Modal de Confirmação Customizado (Geral - opcional para futuras ações) */}
-      {isConfirmModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div 
-            className="w-full max-w-sm p-8 rounded-3xl border-2 shadow-[0_0_50px_rgba(0,0,0,0.3)] animate-in zoom-in duration-300"
-            style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border-color)' }}
-          >
-            <div className="flex items-center justify-center mb-6 text-red-500">
-              <AlertCircle size={48} strokeWidth={1.5} />
-            </div>
-            <h2 className="text-2xl font-bold text-center mb-4 tracking-tight uppercase" style={{ color: 'var(--text-main)' }}>Limpar Tudo?</h2>
-            <p className="text-center mb-8 text-sm opacity-80" style={{ color: 'var(--text-main)' }}>
-              Tem certeza que deseja apagar TODAS as sugestões? Esta ação não pode ser desfeita.
-            </p>
-            <div className="flex flex-col space-y-3">
-              <button 
-                onClick={confirmDeleteAll}
-                className="w-full py-4 rounded-2xl font-bold tracking-[0.2em] uppercase transition-all bg-red-600 text-white hover:bg-red-700 active:scale-95 shadow-[0_0_20px_rgba(220,38,38,0.4)]"
-              >
-                CONFIRMAR
-              </button>
-                <button 
-                  onClick={() => setIsConfirmModalOpen(false)}
-                  className="w-full py-4 rounded-2xl font-bold tracking-[0.2em] uppercase transition-all border-2 bg-[#00cc00] text-[var(--text-main)] border-[#00cc00] hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(0,204,0,0.4)]"
-                  style={{ fontFamily: "'Montserrat', sans-serif" }}
-                >
-                  CANCELAR
-                </button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Auth Modal (Custom In-App Password Area) */}
       <AnimatePresence>
@@ -750,7 +783,7 @@ export default function App() {
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        if (adminPassword === 'admsemeadores*') {
+                        if (adminPassword === ADMIN_PASSCODE) {
                           setIsAdmin(true);
                           setIsAuthModalOpen(false);
                         } else {
@@ -789,7 +822,7 @@ export default function App() {
                   <button 
                     type="button"
                     onClick={() => {
-                      if (adminPassword === 'admsemeadores*') {
+                      if (adminPassword === ADMIN_PASSCODE) {
                         setIsAdmin(true);
                         setIsAuthModalOpen(false);
                       } else {
