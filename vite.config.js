@@ -34,15 +34,6 @@ export default defineConfig({
               cacheableResponse: { statuses: [0, 200] },
               expiration: { maxEntries: 30, maxAgeSeconds: 31536000 }
             }
-          },
-          {
-            urlPattern: /^https:\/\/i\.ibb\.co\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'external-images',
-              cacheableResponse: { statuses: [0, 200] },
-              expiration: { maxEntries: 100, maxAgeSeconds: 31536000 }
-            }
           }
         ]
       }
