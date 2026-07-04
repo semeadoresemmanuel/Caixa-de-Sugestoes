@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Bold, Italic, List, Underline, Type, ListOrdered } from 'lucide-react';
+import { Italic, List, Underline, ListOrdered } from 'lucide-react';
 import { applyWhatsAppFormatting, getCaretCharacterOffsetWithin, setCaretPosition } from '../utils/textFormatting';
 
 export function RichTextEditor({ text, setText }) {
@@ -7,7 +7,6 @@ export function RichTextEditor({ text, setText }) {
     bold: false,
     italic: false,
     underline: false,
-    monospace: false,
     list: false,
     orderedList: false
   });
@@ -30,7 +29,6 @@ export function RichTextEditor({ text, setText }) {
         bold: false,
         italic: false,
         underline: false,
-        monospace: false,
         list: false,
         orderedList: false
       });
@@ -41,7 +39,6 @@ export function RichTextEditor({ text, setText }) {
       bold: document.queryCommandState('bold'),
       italic: document.queryCommandState('italic'),
       underline: document.queryCommandState('underline'),
-      monospace: document.queryCommandValue('fontName') === 'monospace' || document.queryCommandValue('fontName') === '"Courier Prime"',
       list: document.queryCommandState('insertUnorderedList'),
       orderedList: document.queryCommandState('insertOrderedList')
     });
@@ -129,7 +126,7 @@ export function RichTextEditor({ text, setText }) {
       return;
     }
     
-    if (html.includes('*') || html.includes('_') || html.includes('~') || html.includes('```') || html.includes('wa-fmt')) {
+    if (html.includes('*') || html.includes('_') || html.includes('~') || html.includes('wa-fmt')) {
       const formatted = applyWhatsAppFormatting(html);
       if (formatted !== html) {
         const cursorOffset = getCaretCharacterOffsetWithin(editor);
@@ -234,15 +231,15 @@ export function RichTextEditor({ text, setText }) {
         <button 
           type="button" 
           onClick={() => execCommand('bold')} 
-          className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.bold ? 'bg-[#00cc00] text-[#121212] shadow-[0_0_15px_rgba(0,204,0,0.6)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
+          className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.bold ? 'bg-[var(--primary-color)] text-[#121212] shadow-[var(--shadow-glow)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
           title="Negrito"
         >
-          <Bold size={18} />
+          <span className="font-extrabold text-[17px] leading-none w-[18px] h-[18px] flex items-center justify-center">N</span>
         </button>
         <button 
           type="button" 
           onClick={() => execCommand('italic')} 
-          className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.italic ? 'bg-[#00cc00] text-[#121212] shadow-[0_0_15px_rgba(0,204,0,0.6)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
+          className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.italic ? 'bg-[var(--primary-color)] text-[#121212] shadow-[var(--shadow-glow)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
           title="Itálico"
         >
           <Italic size={18} />
@@ -250,23 +247,16 @@ export function RichTextEditor({ text, setText }) {
         <button 
           type="button" 
           onClick={() => execCommand('underline')} 
-          className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.underline ? 'bg-[#00cc00] text-[#121212] shadow-[0_0_15px_rgba(0,204,0,0.6)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
+          className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.underline ? 'bg-[var(--primary-color)] text-[#121212] shadow-[var(--shadow-glow)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
           title="Sublinhado"
         >
           <Underline size={18} />
         </button>
-        <button 
-          type="button" 
-          onClick={() => execCommand('fontName', activeStyles.monospace ? 'inherit' : 'monospace')} 
-          className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.monospace ? 'bg-[#00cc00] text-[#121212] shadow-[0_0_15px_rgba(0,204,0,0.6)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
-          title="Monoespaçado (```)"
-        >
-          <Type size={18} />
-        </button>
+
         <button 
           type="button" 
           onClick={() => execCommand('insertUnorderedList')} 
-          className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.list ? 'bg-[#00cc00] text-[#121212] shadow-[0_0_15px_rgba(0,204,0,0.6)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
+          className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.list ? 'bg-[var(--primary-color)] text-[#121212] shadow-[var(--shadow-glow)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
           title="Checkpoints"
         >
           <List size={18} />
@@ -274,7 +264,7 @@ export function RichTextEditor({ text, setText }) {
         <button 
           type="button" 
           onClick={() => execCommand('insertOrderedList')} 
-          className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.orderedList ? 'bg-[#00cc00] text-[#121212] shadow-[0_0_15px_rgba(0,204,0,0.6)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
+          className={`p-2 rounded-lg transition-all duration-300 ${activeStyles.orderedList ? 'bg-[var(--primary-color)] text-[#121212] shadow-[var(--shadow-glow)] scale-110' : 'hover:bg-[var(--primary-color)]/10 text-[var(--text-main)]'}`} 
           title="Numeração"
         >
           <ListOrdered size={18} />

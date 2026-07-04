@@ -32,7 +32,7 @@ export function AuthModal({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             className="relative w-full max-w-[300px] bg-card border border-border p-4 pt-6 rounded-[40px] shadow-2xl text-center"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            style={{ fontFamily: "'Montserrat', sans-serif" }}
           >
             <button 
               type="button"
@@ -82,7 +82,7 @@ export function AuthModal({
                     darkMode ? "text-white" : "text-black",
                     authError ? "border-destructive ring-1 ring-destructive" : "border-border focus:border-primary/50"
                   )}
-                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
                 />
                 <button 
                   type="button"

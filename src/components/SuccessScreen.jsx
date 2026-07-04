@@ -18,7 +18,7 @@ export function SuccessScreen({ setStatus, isDarkMode }) {
       
       <button 
         onClick={() => setStatus('idle')}
-        className="mt-6 px-10 py-3 rounded-2xl font-bold tracking-[0.2em] uppercase transition-all duration-500 border-2 bg-[#00cc00] text-[var(--text-main)] border-[#00cc00] hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(0,204,0,0.4)]"
+        className="mt-6 px-10 py-3 rounded-2xl font-bold tracking-[0.2em] uppercase transition-all duration-500 border-2 bg-[var(--primary-color)] text-[var(--text-main)] border-[var(--primary-color)] hover:scale-105 active:scale-95 shadow-[var(--btn-shadow)]"
         style={{ fontFamily: "'Montserrat', sans-serif" }}
       >
         NOVA SUGESTÃO
