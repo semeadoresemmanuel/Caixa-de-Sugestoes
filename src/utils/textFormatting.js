@@ -4,7 +4,7 @@ export const applyWhatsAppFormatting = (html) => {
   const elements = div.querySelectorAll('.wa-fmt');
   elements.forEach(el => {
     let textContent = el.textContent;
-    if (textContent === '**' || textContent === '****' || textContent === '__' || textContent === '~~' || textContent === '``````') {
+    if (textContent === '**' || textContent === '****' || textContent === '__' || textContent === '~~') {
       textContent = '';
     }
     const textNode = document.createTextNode(textContent);
@@ -18,8 +18,7 @@ export const applyWhatsAppFormatting = (html) => {
     .replace(/(?<!<[^>]*)\*\*(.+?)\*\*(?![^<]*>)/g, `<b class="wa-fmt">${marker('**')}$1${marker('**')}</b>`)
     .replace(/(?<!<[^>]*)\*(.+?)\*(?![^<]*>)/g, `<b class="wa-fmt">${marker('*')}$1${marker('*')}</b>`)
     .replace(/(?<!<[^>]*)\_(.+?)\_(?![^<]*>)/g, `<i class="wa-fmt">${marker('_')}$1${marker('_')}</i>`)
-    .replace(/(?<!<[^>]*)\~(.+?)\~(?![^<]*>)/g, `<strike class="wa-fmt">${marker('~')}$1${marker('~')}</strike>`)
-    .replace(/(?<!<[^>]*)\`{3}(.+?)\`{3}(?![^<]*>)/g, `<code class="wa-fmt" style="font-family: monospace; background: rgba(0,204,0,0.1); padding: 2px 4px; border-radius: 4px;">${marker('```')}$1${marker('```')}</code>`);
+    .replace(/(?<!<[^>]*)\~(.+?)\~(?![^<]*>)/g, `<strike class="wa-fmt">${marker('~')}$1${marker('~')}</strike>`);
 };
 
 export const getCaretCharacterOffsetWithin = (element) => {
