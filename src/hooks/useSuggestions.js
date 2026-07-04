@@ -19,7 +19,9 @@ export function useSuggestions(user, isAuthenticatedAdmin) {
         return timeB - timeA;
       });
       setSuggestions(data);
-    }, (error) => {});
+    }, (error) => {
+      console.error("Erro ao escutar sugestões:", error);
+    });
     return () => unsubscribe();
   }, [user, isAuthenticatedAdmin]);
 
@@ -27,7 +29,9 @@ export function useSuggestions(user, isAuthenticatedAdmin) {
     if (!user || !isAuthenticatedAdmin) return;
     try {
       await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'suggestions', id));
-    } catch (error) {}
+    } catch (error) {
+      console.error("Erro ao deletar sugestão:", error);
+    }
   };
 
   const deleteAllSuggestions = async () => {
@@ -35,7 +39,9 @@ export function useSuggestions(user, isAuthenticatedAdmin) {
     try {
       const promises = suggestions.map(sug => deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'suggestions', sug.id)));
       await Promise.all(promises);
-    } catch (error) {}
+    } catch (error) {
+      console.error("Erro ao deletar todas as sugestões:", error);
+    }
   };
 
   const addSuggestion = async (content) => {
