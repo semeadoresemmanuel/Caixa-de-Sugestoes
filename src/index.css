@@ -14,18 +14,26 @@
   --border-color: #00cc00;
   --text-dim: rgba(0, 204, 0, 0.6);
   --input-bg: #121212;
-  --text-main: #ffffff;
+  --text-main: #F7F7F7;
+  --shadow-glow: 0 0 15px rgba(0, 204, 0, 0.6);
+  --btn-shadow: 0 0 25px rgba(0, 204, 0, 0.4);
+  --submit-shadow: 0 0 30px rgba(0, 204, 0, 0.7);
+  --submit-btn-text: #121212;
 }
 
 [data-theme='light'] {
   --bg-color: #f7f7f7;
   --card-bg: #f7f7f7;
-  --primary-color: #00cc00;
-  --primary-glow: rgba(0, 204, 0, 0.05);
-  --border-color: #00cc00;
-  --text-dim: rgba(0, 204, 0, 0.6);
+  --primary-color: #009C00;
+  --primary-glow: rgba(0, 156, 0, 0.05);
+  --border-color: #009C00;
+  --text-dim: rgba(0, 156, 0, 0.6);
   --input-bg: #f7f7f7;
-  --text-main: #000000;
+  --text-main: #121212;
+  --shadow-glow: 0 0 15px rgba(0, 156, 0, 0.6);
+  --btn-shadow: 0 0 25px rgba(0, 156, 0, 0.4);
+  --submit-shadow: 0 0 30px rgba(0, 156, 0, 0.7);
+  --submit-btn-text: #F7F7F7;
 }
 
 html, body {
@@ -76,16 +84,19 @@ body {
 }
 
 ul, ol {
-  padding-left: 1.2rem;
+  margin-left: 0;
+  list-style-position: outside;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
 ul {
+  padding-left: 12px;
   list-style-type: disc !important;
 }
 
 ol {
+  padding-left: 16px;
   list-style-type: decimal !important;
 }
 

@@ -96,14 +96,21 @@ export default function App() {
           <SuccessScreen setStatus={setStatus} isDarkMode={isDarkMode} />
         ) : (
           <form tabIndex="-1" onSubmit={handleSubmit} className="flex flex-col space-y-6 outline-none border-none ring-0" style={{ outline: 'none' }}>
-            <div className="w-full flex flex-col items-center pointer-events-none mb-2">
-                <h1 className="text-sm sm:text-base font-bold tracking-[0.2em] sm:tracking-[0.4em] uppercase leading-none text-center" style={{ color: 'var(--text-main)', fontFamily: "'Montserrat', sans-serif" }}>
+            <div className="w-full flex flex-col items-center pointer-events-none mb-[3px]">
+              <div className="relative flex flex-col items-center w-full">
+                <img 
+                  src={isDarkMode ? padlockDarkImg : padlockLightImg} 
+                  alt="Cadeado de Fundo" 
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 object-contain opacity-10 pointer-events-none select-none z-0" 
+                />
+                <h1 className="relative z-10 text-sm sm:text-base font-bold tracking-[0.2em] sm:tracking-[0.4em] uppercase leading-none text-center" style={{ color: 'var(--text-main)', fontFamily: "'Montserrat', sans-serif" }}>
                   Caixa de Sugestões
                 </h1>
-                <span className="text-[11px] font-medium tracking-[0.6em] sm:tracking-[0.8em] uppercase mt-2 text-center" style={{ color: 'var(--text-main)', fontFamily: "'Montserrat', sans-serif" }}>
+                <span className="relative z-10 text-[11px] font-medium tracking-[0.6em] sm:tracking-[0.8em] uppercase mt-2 text-center" style={{ color: 'var(--text-main)', fontFamily: "'Montserrat', sans-serif" }}>
                   Anônima
                 </span>
-                <div className="w-40 h-[1.5px] mt-4 opacity-60" style={{ background: 'linear-gradient(to right, transparent, var(--text-main), transparent)' }}></div>
+              </div>
+              <div className="w-40 h-[1.5px] mt-[43px] opacity-60" style={{ background: 'linear-gradient(to right, transparent, var(--text-main), transparent)' }}></div>
             </div>
 
             <RichTextEditor text={text} setText={setText} />
@@ -128,13 +135,13 @@ export default function App() {
                   : `w-auto px-10 rounded-2xl ${(!text.trim() || text === '<br>') ? 'cursor-not-allowed' : 'hover:scale-105 active:scale-95'}` 
                 }`}
                 style={{ 
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  backgroundColor: 'var(--card-bg)',
-                  borderColor: 'var(--border-color)',
-                  color: 'var(--text-main)',
+                  fontFamily: "'Montserrat', sans-serif",
+                  backgroundColor: 'var(--primary-color)',
+                  borderColor: 'var(--primary-color)',
+                  color: '#F7F7F7',
                   boxShadow: (text.trim() && text !== '<br>') 
-                    ? '0 0 30px rgba(0, 204, 0, 0.7)' 
-                    : 'none',
+                  ? 'var(--submit-shadow)' 
+                  : 'none',
                 }}
               >
                 {status === 'submitting' ? (
